@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estandarte · prototipo 0.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#17110c; --walnut:#251b13; --oak:#3a2b1e; --rim:#6b5233; --rim2:#8a6b40;
+  --vellum:#eadfc6; --dim:#b3a383; --gold:#d9b45a; --blood:#c0543f; --ok:#8db35f;
+  --ui:"Pixelify Sans", "Trebuchet MS", system-ui, sans-serif;
+  --text:"IM Fell English", Georgia, "Times New Roman", serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --walnut:#251b13; --vellum:#eadfc6; } }
+:root[data-theme="dark"]{ --walnut:#251b13; --vellum:#eadfc6; }
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:#1e3a55}
+body{height:100%;margin:0;background:#1e3a55;color:var(--vellum);font-family:var(--ui);overflow:hidden;-webkit-user-select:none;user-select:none}
+*,*::before,*::after{box-sizing:border-box}
+#app{position:relative;height:100%;overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair;image-rendering:pixelated}
+.panel{background:rgba(37,27,19,.95);border:2px solid var(--rim);box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),0 3px 0 rgba(0,0,0,.45);border-radius:2px}
+button{font-family:var(--ui);font-size:13px;color:var(--vellum);background:var(--oak);border:2px solid var(--rim);border-radius:2px;padding:5px 9px;cursor:pointer;line-height:1.15}
+button:hover:not(:disabled){border-color:var(--gold)}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button.on{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+button.warn{border-color:#8a3a2c}
+button:disabled{opacity:.42;cursor:not-allowed}
+#hud{position:absolute;top:6px;left:6px;right:6px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:6px 10px;z-index:5}
+#hud .who{display:flex;align-items:center;gap:8px;min-width:0}
+#hud .crest{width:14px;height:18px;background:var(--gold);clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%)}
+#hud .nm{font-family:var(--text);font-size:17px;white-space:nowrap}
+#hud .stats{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px}
+#hud .stats b{color:var(--gold);font-weight:600}
+#hud .stats .bad{color:var(--blood)}
+.hp{display:inline-block;width:54px;height:7px;background:#000;border:1px solid var(--rim);vertical-align:middle;margin-left:3px}
+.hp i{display:block;height:100%;background:var(--blood)}
+#hud .time{display:flex;align-items:center;gap:4px;margin-left:auto;font-size:13px}
+#hud .time span{margin-right:6px;color:var(--dim);white-space:nowrap}
+#hud .menu{display:flex;gap:4px;flex-wrap:wrap}
+#chron{position:absolute;right:6px;top:64px;width:300px;max-height:calc(100% - 300px);display:flex;flex-direction:column;z-index:4}
+#chron h3{margin:0;padding:7px 10px 5px;font-family:var(--text);font-weight:400;font-size:18px;border-bottom:1px solid var(--rim)}
+#chron .list{overflow-y:auto;padding:4px 10px 8px;font-family:var(--text);font-size:15px;line-height:1.35}
+#chron .e{padding:4px 0;border-bottom:1px dotted rgba(107,82,51,.5)}
+#chron .e small{display:block;color:var(--dim);font-family:var(--ui);font-size:11px}
+#chron.hide{display:none}
+#minibox{position:absolute;left:6px;bottom:6px;padding:4px;z-index:4}
+#mini{display:block;width:180px;height:120px;image-rendering:pixelated;cursor:pointer}
+#zoom{display:flex;gap:4px;margin-top:4px}
+#zoom button{flex:1;padding:3px 0}
+#ctx,#bbar{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;max-width:min(560px,calc(100% - 210px));padding:9px 12px;z-index:5}
+#ctx h4,#bbar h4,#pop h4{margin:0 0 3px;font-family:var(--text);font-weight:400;font-size:19px}
+.sub{color:var(--dim);font-size:12px;margin-bottom:7px}
+.row{display:flex;flex-wrap:wrap;gap:5px}
+#pop{position:absolute;left:50%;top:76px;transform:translateX(-50%);width:min(340px,calc(100% - 20px));padding:10px 12px;z-index:6}
+#pop p{margin:4px 0;font-size:13px}
+#modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,8,6,.55);z-index:20;padding:12px}
+#modal.open{display:flex}
+#modal .box{width:min(760px,100%);max-height:100%;overflow-y:auto;padding:16px 18px}
+#modal h2{font-family:var(--text);font-weight:400;font-size:28px;margin:0 0 6px}
+#modal h3{font-family:var(--text);font-weight:400;font-size:20px;margin:14px 0 6px}
+#modal p{font-family:var(--text);font-size:16px;line-height:1.45;margin:6px 0;max-width:68ch}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;color:var(--dim);font-weight:400;padding:4px 6px;border-bottom:1px solid var(--rim)}
+td{padding:5px 6px;border-bottom:1px dotted rgba(107,82,51,.55);vertical-align:top}
+.tr{display:inline-block;border:1px solid var(--rim);padding:0 4px;margin:1px 2px 1px 0;font-size:11px;color:var(--dim)}
+.sw{display:inline-block;width:12px;height:12px;border:1px solid #000;vertical-align:-1px;margin-right:6px}
+.kg{border-top:1px solid var(--rim);padding:10px 0}
+.kg .t{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.kg .t b{font-family:var(--text);font-weight:400;font-size:19px}
+.kg .d{font-size:12px;color:var(--dim);margin:3px 0 6px}
+.war{color:var(--blood)}
+.start{max-width:520px!important}
+.mlist{display:flex;flex-direction:column;gap:5px;max-width:520px;margin-top:8px}
+.mlist button{text-align:left;padding:8px 12px;font-size:14px}
+#scene{display:block;width:100%;max-width:640px;height:auto;image-rendering:pixelated;border:2px solid var(--rim);margin:-4px 0 10px}
+td.tb{white-space:nowrap}td.tb button{padding:3px 7px;margin:1px}
+.rank{font-size:12px;color:var(--dim)}
+.mbar{display:inline-block;width:70px;height:7px;background:#000;border:1px solid var(--rim);vertical-align:middle}.mbar i{display:block;height:100%;background:var(--blood)}
+.st-w{color:var(--blood)}
+.start .ttl{font-family:var(--text);font-size:56px;line-height:1;margin:0;letter-spacing:.5px}
+.start .tag{font-family:var(--text);font-style:italic;color:var(--dim);font-size:18px;margin:4px 0 14px}
+.start label{display:block;font-size:13px;color:var(--dim);margin:12px 0 4px}
+.start input{width:100%;font-family:var(--text);font-size:20px;padding:6px 8px;background:var(--ink);color:var(--vellum);border:2px solid var(--rim);border-radius:2px}
+.start input:focus{outline:2px solid var(--gold)}
+.start ul{font-size:13px;color:var(--dim);padding-left:18px;line-height:1.6}
+#toasts{position:absolute;left:50%;top:84px;transform:translateX(-50%);display:flex;flex-direction:column;gap:4px;align-items:center;z-index:7;pointer-events:none;width:min(520px,calc(100% - 20px))}
+.toast{font-family:var(--text);font-size:16px;padding:6px 12px;text-align:center}
+@media (max-width:820px){
+  #chron{width:auto;left:6px;top:auto;bottom:150px;max-height:32%}
+  #hud{gap:4px 10px;padding:5px 8px}
+  #hud .nm{font-size:15px}
+  #hud .time{margin-left:0}
+  #mini{width:120px;height:80px}
+  #ctx,#bbar{left:auto;right:6px;transform:none;max-width:calc(100% - 150px)}
+  #pop{top:auto;bottom:120px}
+}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="cv"></canvas>
+  <header id="hud" class="panel" style="display:none"></header>
+  <aside id="chron" class="panel" style="display:none"><h3>Crónica</h3><div class="list"></div></aside>
+  <div id="minibox" class="panel" style="display:none"><canvas id="mini" width="150" height="100"></canvas>
+    <div id="zoom"><button data-a="zoomout" aria-label="Alejar">−</button><button data-a="center" aria-label="Centrar en ti">◎</button><button data-a="zoomin" aria-label="Acercar">+</button></div></div>
+  <div id="ctx" class="panel" style="display:none"></div>
+  <div id="bbar" class="panel" style="display:none"></div>
+  <div id="pop" class="panel" style="display:none"></div>
+  <div id="toasts"></div>
+  <div id="modal"><div class="box panel"></div></div>
+</div>
+<script>
+'use strict';
+// ================= Constantes y utilidades =================
+const W=150,H=100,TS=8,DAY=1.0,SPEEDS=[1,2,4];
+const WATER=0,SAND=1,GRASS=2,FOREST=3,HILL=4,MOUNT=5;
+const SPEEDF=[0.5,0.9,1,0.65,0.7,0.5];
+const SAVEKEY='estandarte_v03';
+const R=()=>Math.random();
+const ri=(a,b)=>a+Math.floor(R()*(b-a+1));
+const pick=a=>a[Math.floor(R()*a.length)];
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const dist=(ax,ay,bx,by)=>Math.hypot(ax-bx,ay-by);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+
+const KNAMES=['Valdoria','Castemar','Aldervik','Morvenn','Brenmoor','Ostrava','Lindemar','Tharsis'];
+const KCOLORS=['#3b6fb6','#b33a3a','#3f8a4a','#8a55b0','#c8742a'];
+const PCOLOR='#e2b93b', BCOLOR='#4a3b30';
+const HOUSES=['Aranda','Montfort','Lusignan','Haro','Lara','Castro','Ventadour','Blois','Ibelín','Anjou','Moncada','Trastámara'];
+const MALE=['Aldric','Bertrán','Conrado','Godofredo','Leopoldo','Ramiro','Tancredo','Ulrico','Wilfredo','Fernando','Alfonso','Sancho','Rodrigo','Balduino','Teobaldo','Gonzalo','Hugo','Raimundo','Lope','Íñigo','Martín','Pedro','Tomás','Bernardo','Guillén','Nuño','Diego','Esteban','Mateo','Simón','Garcí','Vela','Ordoño','Fruela'];
+const FEMALE=['Leonor','Urraca','Matilde','Berenguela','Isabel','Constanza','Blanca','Sancha','Elvira','Teresa','Jimena','Inés'];
+const EPI=['el Cojo','el Rojo','Manodura','el Joven','el Tuerto','el Callado','Barbanegra','el Zurdo','el Viejo','Cuervo','el Herrero','el Largo','Medioañal','el Pardo'];
+const PRE=['Val','Mon','Roc','Fuen','Ser','Bel','Cas','Tor','Al','Mira','Pe','Bur','Cor','Vi','Sa','Gra','Os','Bre'];
+const SUF=['dosa','real','ferrada','tejo','nera','lagos','viejo','mora','bria','cedo','randa','gal','fría','monte','vado','sella','gosa','mar'];
+const SEASONS=['primavera','verano','otoño','invierno'];
+const STRAITS={
+  'Valiente':{d:'No se arredra: +1 ataque',atk:1},
+  'Cobarde':{d:'Pierde el valor pronto: −1 ataque',atk:-1},
+  'Fuerte':{d:'+8 de vida',hp:8},
+  'Ágil':{d:'Se mueve y golpea más rápido',spd:.35,cd:-.15},
+  'Torpe':{d:'Golpea más lento',cd:.2},
+  'Glotón':{d:'Come el doble',food:1},
+  'Leal':{d:'Nunca deserta'},
+  'Veterano':{d:'Curtido en mil peleas: +1 defensa',def:1},
+};
+const LTRAITS={'Carismático':'Reclutar te cuesta menos','Guerrero':'Más vida y ataque en combate','Astuto':'La comida te cuesta menos','Ambicioso':'Ganas más renombre'};
+const RTRAITS=['Belicoso','Pacífico','Ambicioso','Prudente','Cruel','Justo'];
+
+let G=null, started=false, terr, hgt, comp, mainComp=0, own;
+let terrCv, terrCtx2, miniBase;
+let NID=1; const nid=()=>NID++;
+let road=new Uint8Array(W*H);
+function fmtDate(d){return `Día ${d%15+1} de ${SEASONS[Math.floor(d/15)%4]}, año ${1200+Math.floor(d/60)}`}
+
+// ================= Terreno =================
+function genTerrain(seed){
+  const r=mulberry32(seed);
+  function mk(cells){const n=cells+1,L=new Float32Array(n*n);for(let i=0;i<L.length;i++)L[i]=r();
+    return(x,y)=>{const fx=x*cells,fy=y*cells,ix=Math.floor(fx),iy=Math.floor(fy),tx=fx-ix,ty=fy-iy,sx=tx*tx*(3-2*tx),sy=ty*ty*(3-2*ty);
+      const a=L[iy*n+ix],b=L[iy*n+ix+1],c=L[(iy+1)*n+ix],d=L[(iy+1)*n+ix+1];return a+(b-a)*sx+(c-a)*sy+(a-b-c+d)*sx*sy}}
+  const oct=[[mk(3),.5],[mk(7),.25],[mk(14),.14],[mk(28),.08]], moi=[[mk(4),.6],[mk(11),.3],[mk(24),.1]];
+  terr=new Uint8Array(W*H); hgt=new Float32Array(W*H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const u=x/W,v=y/H; let h=0; for(const[f,w]of oct)h+=f(u,v)*w; h/=.97;
+    let m=0; for(const[f,w]of moi)m+=f(u,v)*w;
+    const dx=(u-.5)*2,dy=(v-.5)*2, d=Math.max(Math.abs(dx),Math.abs(dy))*.55+Math.hypot(dx,dy)*.45;
+    h=h-d*d*.62+.2; const i=y*W+x; hgt[i]=h;
+    terr[i]= h<.37?WATER: h<.40?SAND: h>.80?MOUNT: h>.70?HILL: m>.54?FOREST: GRASS;
+  }
+  // componentes conexas de tierra transitable
+  comp=new Int32Array(W*H).fill(-1); let best=0,bestN=0,c=0; const st=[];
+  for(let i=0;i<W*H;i++){ if(comp[i]>=0||!passIdx(i))continue; let n=0; st.push(i); comp[i]=c;
+    while(st.length){const j=st.pop();n++;const x=j%W,y=(j/W)|0;
+      for(const[k,ok]of[[j-1,x>0],[j+1,x<W-1],[j-W,y>0],[j+W,y<H-1]])if(ok&&comp[k]<0&&passIdx(k)){comp[k]=c;st.push(k)}}
+    if(n>bestN){bestN=n;best=c} c++; }
+  mainComp=best; return bestN;
+}
+function passIdx(i){const t=terr[i];return t!==WATER&&t!==MOUNT}
+function inMain(x,y){x|=0;y|=0;return x>=0&&y>=0&&x<W&&y<H&&comp[y*W+x]===mainComp}
+function passableAt(x,y){return inMain(x,y)}
+function terrAt(x,y){return terr[clamp(y|0,0,H-1)*W+clamp(x|0,0,W-1)]}
+function lineClear(ax,ay,bx,by){const d=dist(ax,ay,bx,by),n=Math.ceil(d*2);for(let i=1;i<=n;i++){const t=i/n;if(!passableAt(ax+(bx-ax)*t,ay+(by-ay)*t))return false}return true}
+
+// A* en rejilla de 8 direcciones
+const gS=new Float32Array(W*H),came=new Int32Array(W*H),stamp=new Int32Array(W*H),closedS=new Int32Array(W*H);let stampN=0;
+function nearestPass(x,y){x=clamp(x|0,0,W-1);y=clamp(y|0,0,H-1);if(inMain(x,y))return[x,y];
+  for(let r=1;r<8;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const a=x+dx,b=y+dy;if(inMain(a,b))return[a,b]}return null}
+function findPath(fx,fy,tx,ty){
+  const s=nearestPass(fx,fy),t=nearestPass(tx,ty); if(!s||!t)return null;
+  const S=s[1]*W+s[0],T=t[1]*W+t[0]; if(S===T)return[[tx,ty]];
+  stampN++; const hx=[],hf=[];
+  const push=(n,f)=>{hx.push(n);hf.push(f);let i=hx.length-1;while(i>0){const p=(i-1)>>1;if(hf[p]<=hf[i])break;[hx[p],hx[i]]=[hx[i],hx[p]];[hf[p],hf[i]]=[hf[i],hf[p]];i=p}};
+  const pop=()=>{const top=hx[0],ln=hx.pop(),lf=hf.pop();if(hx.length){hx[0]=ln;hf[0]=lf;let i=0;for(;;){const l=2*i+1,r=l+1;let m=i;if(l<hx.length&&hf[l]<hf[m])m=l;if(r<hx.length&&hf[r]<hf[m])m=r;if(m===i)break;[hx[m],hx[i]]=[hx[i],hx[m]];[hf[m],hf[i]]=[hf[i],hf[m]];i=m}}return top};
+  const heur=(i)=>{const dx=Math.abs(i%W-t[0]),dy=Math.abs(((i/W)|0)-t[1]);return (dx+dy-.6*Math.min(dx,dy))*.95};
+  stamp[S]=stampN;gS[S]=0;came[S]=-1;push(S,heur(S)); let it=0,found=false;
+  while(hx.length&&it++<14000){const c=pop();if(closedS[c]===stampN)continue;closedS[c]=stampN;if(c===T){found=true;break}
+    const cx=c%W,cy=(c/W)|0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=cx+dx,ny=cy+dy;if(!inMain(nx,ny))continue;
+      if(dx&&dy&&(!inMain(cx+dx,cy)||!inMain(cx,cy+dy)))continue;
+      const n=ny*W+nx;if(closedS[n]===stampN)continue;const cost=(dx&&dy?1.414:1)/SPEEDF[terr[n]]/(road[n]?1.6:1);const g=gS[c]+cost;
+      if(stamp[n]!==stampN||g<gS[n]){stamp[n]=stampN;gS[n]=g;came[n]=c;push(n,g+heur(n))}}}
+  if(!found)return null; const path=[]; let c=T; while(c!==S&&c>=0){path.push([c%W+.5,((c/W)|0)+.5]);c=came[c]}
+  path.reverse(); if(path.length)path[path.length-1]=[inMain(tx,ty)?tx:t[0]+.5,inMain(tx,ty)?ty:t[1]+.5]; return path;
+}
+
+// ================= Mundo =================
+function newName(){const used=new Set(G.settlements.map(s=>s.name));for(let i=0;i<50;i++){const n=pick(PRE)+pick(SUF);if(!used.has(n))return n}return pick(PRE)+pick(SUF)+' '+ri(2,9)}
+function makeRuler(k){const female=R()<.25,name=female?pick(FEMALE):pick(MALE);k.names[name]=(k.names[name]||0)+1;
+  const tr=[pick(RTRAITS)];let t2=pick(RTRAITS);if(t2!==tr[0]&&!((t2==='Belicoso'&&tr[0]==='Pacífico')||(t2==='Pacífico'&&tr[0]==='Belicoso')||(t2==='Cruel'&&tr[0]==='Justo')||(t2==='Justo'&&tr[0]==='Cruel')))tr.push(t2);
+  return{name,female,num:k.names[name],age:ri(22,60),traits:tr}}
+function rulerTitle(k){const r=k.ruler;return `${r.female?'Reina':'Rey'} ${r.name} ${ROMAN[r.num]||r.num}`}
+function makeSoldier(lvl=1,q=1,eq=0){
+  const s={eq:0,id:nid(),name:pick(MALE)+(R()<.55?' '+pick(EPI):''),lvl:1,xp:0,kills:0,traits:[],hp:0,maxhp:Math.round(28*q),atk:Math.round(6*q),def:0,spd:1.7,cdb:1.1};
+  const keys=Object.keys(STRAITS),n=R()<.35?2:1,bad={Valiente:'Cobarde',Cobarde:'Valiente','Ágil':'Torpe',Torpe:'Ágil'};
+  let g=0;while(s.traits.length<n&&g++<20){const t=pick(keys);if(!s.traits.includes(t)&&!s.traits.includes(bad[t]))s.traits.push(t)}
+  for(const t of s.traits){const e=STRAITS[t];if(e.atk)s.atk+=e.atk;if(e.hp)s.maxhp+=e.hp;if(e.spd)s.spd+=e.spd;if(e.cd)s.cdb+=e.cd;if(e.def)s.def+=e.def}
+  for(let i=1;i<lvl;i++)lvlUp(s); if(eq)setEq(s,eq); s.hp=s.maxhp; return s;
+}
+function lvlUp(s){s.lvl++;s.maxhp+=4;s.atk+=1;s.hp=Math.min(s.maxhp,s.hp+4)}
+// Árbol de tropas: Recluta → Soldado → (Guardia | Hachero) → Sargento/veterano → Élite
+const UPXP=[0,0,40,90,160,260],UPCOST=[0,0,20,45,90,160];
+function rankName(s){if(s.lord)return'Señor';const r=s.lvl,g=s.line!=='h';return r<=1?'Recluta':r===2?'Soldado':r===3?(g?'Guardia':'Hachero'):r===4?(g?'Sargento de guardia':'Hachero veterano'):(g?'Guardia de élite':'Campeón')}
+function canUp(s){return!s.lord&&s.lvl<5&&s.xp>=UPXP[s.lvl+1]}
+function doUp(s,line){const need=UPXP[s.lvl+1];if(s.lvl===2)s.line=line||'g';s.xp-=need;lvlUp(s);if(s.line==='g'&&(s.lvl===3||s.lvl===5)){s.def+=1;s.maxhp+=4}if(s.line==='h'&&s.lvl>=3)s.atk+=1;
+  const minEq=s.lvl>=5?3:s.lvl>=3?2:1;if((s.eq||0)<minEq)setEq(s,minEq);s.hp=Math.min(s.maxhp,s.hp+6)}
+function fit(p){return p.soldiers.filter(s=>!s.wounded)}
+function survChance(s,med){return clamp(.2+s.lvl*.08+med*.004,.15,.92)}
+function baseMorale(p){return p.kind==='player'?G.player.morale:p.kind==='garrison'?70:p.kind==='army'?65:p.kind==='patrol'?60:45}
+function moraleParts(){const pl=G.player,inv=pl.inv,types=FOODK.filter(k=>(inv[k]||0)>0).length,parts=[['Base',50]];
+  if(types>=2)parts.push(['Variedad de comida ('+types+' tipos)',types===2?6:12]);
+  const t=tierOf();if(t)parts.push(['Tu rango',t*2]);
+  if(Math.round(pl.mev||0))parts.push(['Victorias y derrotas recientes',Math.round(pl.mev)]);
+  if(pl.hungry)parts.push(['Hambre',-25]);if(pl.unpaid)parts.push(['Sin paga',-18]);
+  if(menOf()>partyLimit())parts.push(['Demasiados hombres para tu rango',-10]);
+  const w=PP().soldiers.filter(s=>s.wounded).length;if(w>PP().soldiers.length/2)parts.push(['Muchos heridos',-6]);
+  return parts}
+function moraleTarget(){return clamp(moraleParts().reduce((a,x)=>a+x[1],0),0,100)}
+function moraleWord(m){return m>=80?'Exultante':m>=60?'Alta':m>=40?'Normal':m>=25?'Baja':'Al borde del motín'}
+function addSettlement(type,x,y,owner){const s={id:nid(),name:newName(),type,x,y,owner,recruits:type==='castle'?4:2};G.settlements.push(s);initStock(s);
+  const g={id:nid(),kind:'garrison',fac:owner,x,y,soldiers:[],settle:s.id,immune:0};const n=owner===0?0:(type==='castle'?12:4);
+  for(let i=0;i<n;i++)g.soldiers.push(makeSoldier(type==='castle'?ri(1,3):1,1,type==='castle'?ri(1,2):1));G.parties.push(g);s.gar=g.id;return s}
+function farFromSettl(x,y,d){return G.settlements.every(s=>dist(s.x,s.y,x,y)>=d)}
+
+function genWorld(seed){
+  let n=0,tries=0;
+  do{ seed=(seed+tries*7919)>>>0; n=genTerrain(seed); tries++; }while(n<W*H*.33&&tries<12);
+  NID=1;own=null;
+  G={seed,day:0,dayT:0,kingdoms:[],settlements:[],parties:[],wars:{},rel:{},log:[],
+     player:{name:'',age:24,traits:[],gold:150,inv:{grano:12,pescado:6},rac:0,morale:65,mev:0,med:5,pris:{n:0,v:0},quests:[],renown:0,liege:null,peaceCD:0,started:false},roads:[]};road=new Uint8Array(W*H);
+  G.kingdoms.push({id:0,name:'',color:PCOLOR,isPlayer:true,alive:true,names:{}});
+  const caps=[]; let md=30;
+  for(let k=1;k<=5;k++){let ok=false;
+    for(let t=0;t<4000&&!ok;t++){const x=ri(8,W-9),y=ri(7,H-8);if(terr[y*W+x]!==GRASS||!inMain(x,y))continue;
+      if(caps.every(c=>dist(c[0],c[1],x,y)>=md)){caps.push([x,y]);ok=true}}
+    if(!ok){md-=4;k--;if(md<10)break}}
+  const houses=[...HOUSES].sort(()=>R()-.5),names=[...KNAMES].sort(()=>R()-.5);
+  caps.forEach((c,i)=>{const k={id:i+1,name:names[i],color:KCOLORS[i],isPlayer:false,alive:true,names:{},house:houses[i],gold:ri(30,80),man:ri(10,20),capital:0};
+    k.ruler=makeRuler(k);G.kingdoms.push(k);const cs=addSettlement('castle',c[0]+.5,c[1]+.5,k.id);k.capital=cs.id;
+    for(let v=0;v<3;v++)foundVillage(k,true)});
+  const ks=G.kingdoms.filter(k=>!k.isPlayer);
+  for(let a=0;a<ks.length;a++)for(let b=a+1;b<ks.length;b++)G.rel[key(ks[a].id,ks[b].id)]=ri(-30,25);
+  if(ks.length>=2){const a=pick(ks);let b=pick(ks);while(b===a)b=pick(ks);G.wars[key(a.id,b.id)]=0;G.rel[key(a.id,b.id)]=-50}
+  buildRoads();
+  // jugador
+  const v=pick(G.settlements.filter(s=>s.type==='village'));let sp=nearestPass(v.x+1,v.y+3)||[v.x|0,v.y|0];
+  const lord=makeSoldier(1,1);lord.lord=true;lord.traits=[];lord.maxhp=60;lord.hp=60;lord.atk=9;lord.def=1;lord.spd=1.9;lord.cdb=1;lord.eq=1;
+  const pp={id:nid(),kind:'player',fac:0,x:sp[0]+.5,y:sp[1]+.5,soldiers:[lord],path:[],target:null,immune:0,face:1};
+  for(let i=0;i<3;i++)pp.soldiers.push(makeSoldier(1,1,1));G.parties.push(pp);
+  rebuildTerritory();
+  for(const[k2]of Object.entries(G.wars)){const[a,b]=k2.split('|').map(Number);log(`${G.kingdoms[a].name} y ${G.kingdoms[b].name} están en guerra.`)}
+}
+function foundVillage(k,quiet){
+  const mine=G.settlements.filter(s=>s.owner===k.id); if(!mine.length)return false;
+  for(let t=0;t<60;t++){const b=pick(mine),a=R()*Math.PI*2,d=7+R()*5,x=(b.x+Math.cos(a)*d)|0,y=(b.y+Math.sin(a)*d)|0;
+    if(x<3||y<3||x>W-4||y>H-4||!inMain(x,y))continue; const t2=terr[y*W+x]; if(t2!==GRASS&&t2!==FOREST&&t2!==SAND)continue;
+    if(!farFromSettl(x+.5,y+.5,6.5))continue; if(own&&own[y*W+x]>=0&&own[y*W+x]!==k.id)continue;
+    const s=addSettlement('village',x+.5,y+.5,k.id); if(!quiet){log(`${k.name} fundó la aldea de ${s.name}.`);let nb=null,nd=1e9;for(const o of G.settlements){if(o===s)continue;const d=dist(o.x,o.y,s.x,s.y);if(d<nd){nd=d;nb=o}}if(nb)addRoad(nb,s);rebuildTerritory()} return true}
+  return false;
+}
+function key(a,b){return a<b?a+'|'+b:b+'|'+a}
+function getRel(a,b){return G.rel[key(a,b)]??0}
+function addRel(a,b,v){const k=key(a,b);G.rel[k]=clamp((G.rel[k]??0)+v,-100,100)}
+function atWarDirect(a,b){return G.wars[key(a,b)]!==undefined}
+function facWar(a,b){
+  if(a===b)return false; if(a<0||b<0)return true; if(atWarDirect(a,b))return true;
+  const L=G.player.liege; if(L!=null){if(a===0&&b!==L&&atWarDirect(L,b))return true;if(b===0&&a!==L&&atWarDirect(L,a))return true}
+  return false}
+function facName(id){return id<0?'Bandidos':id===0?`Señorío de ${G.player.name||'—'}`:G.kingdoms[id].name}
+function facColor(id){return id<0?BCOLOR:G.kingdoms[id].color}
+function settl(id){return G.settlements.find(s=>s.id===id)}
+function party(id){return G.parties.find(p=>p.id===id)}
+function PP(){return G.parties.find(p=>p.kind==='player')}
+function lordOf(){return PP().soldiers.find(s=>s.lord)}
+function strength(p){let s=0;for(const x of p.soldiers)if(!x.wounded)s+=x.atk*Math.max(1,x.hp)/10;return s}
+function partyName(p){if(p.kind==='player')return'Tu compañía';if(p.kind==='bandit')return p.name||'Bandidos';
+  const k=G.kingdoms[p.fac];return(p.kind==='army'?'Ejército de ':'Patrulla de ')+k.name}
+function declareWar(a,b,why){
+  if(atWarDirect(a,b))return; G.wars[key(a,b)]=G.day; addRel(a,b,-20);
+  const an=a===0?'Tú':G.kingdoms[a].name, bn=b===0?'ti':G.kingdoms[b].name;
+  log(a===0?`Declaraste la guerra a ${bn}${why?' ('+why+')':''}.`:b===0?`${an} te declaró la guerra.`:`${an} declaró la guerra a ${bn}.`, a===0||b===0||a===G.player.liege||b===G.player.liege);
+}
+function makePeace(a,b){if(!atWarDirect(a,b))return;delete G.wars[key(a,b)];G.rel[key(a,b)]=-10;
+  log(a===0||b===0?`Firmaste la paz con ${G.kingdoms[a===0?b:a].name}.`:`${G.kingdoms[a].name} y ${G.kingdoms[b].name} firmaron la paz.`,a===0||b===0)}
+
+// ================= Crónica y avisos =================
+function log(t,imp){if(!G)return;G.log.unshift({d:G.day,t});if(G.log.length>160)G.log.pop();chronDirty=true;if(imp)toast(t)}
+let chronDirty=true;
+function toast(t){if(!started)return;const el=document.createElement('div');el.className='toast panel';el.textContent=t;const box=document.getElementById('toasts');
+  box.appendChild(el);while(box.children.length>3)box.firstChild.remove();setTimeout(()=>el.remove(),4200)}
+
+// ================= Territorio y lienzos =================
+const bestD=new Float32Array(W*H);
+function rebuildTerritory(){
+  own=own||new Int16Array(W*H); own.fill(-1); bestD.fill(1e9);
+  for(const s of G.settlements){const Rr=s.type==='castle'?9:6.5;
+    for(let y=Math.max(0,Math.floor(s.y-Rr));y<=Math.min(H-1,Math.ceil(s.y+Rr));y++)for(let x=Math.max(0,Math.floor(s.x-Rr));x<=Math.min(W-1,Math.ceil(s.x+Rr));x++){
+      const i=y*W+x;if(terr[i]===WATER)continue;const d=dist(x+.5,y+.5,s.x,s.y);if(d<=Rr&&d<bestD[i]){bestD[i]=d;own[i]=s.owner}}}
+  if(typeof document==='undefined'||!terrCv)return;
+  const c=terCvOwn.getContext('2d');c.clearRect(0,0,W*TS,H*TS);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,o=own[i];if(o<0)continue;c.fillStyle=facColor(o);
+    c.globalAlpha=.17;c.fillRect(x*TS,y*TS,TS,TS);c.globalAlpha=.9;
+    if(x===0||own[i-1]!==o)c.fillRect(x*TS,y*TS,1,TS); if(x===W-1||own[i+1]!==o)c.fillRect(x*TS+TS-1,y*TS,1,TS);
+    if(y===0||own[i-W]!==o)c.fillRect(x*TS,y*TS,TS,1); if(y===H-1||own[i+W]!==o)c.fillRect(x*TS,y*TS+TS-1,TS,1)}
+  c.globalAlpha=1; miniDirty=true;
+}
+let terCvOwn;
+function shade(hex,k){const n=parseInt(hex.slice(1),16);let r=n>>16&255,g=n>>8&255,b=n&255;
+  if(k<0){r*=1+k;g*=1+k;b*=1+k}else{r+=(255-r)*k;g+=(255-g)*k;b+=(255-b)*k}
+  return'#'+[r,g,b].map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,'0')).join('')}
+function buildTerrainCanvas(){
+  const WW=W*TS,HH=H*TS;
+  terrCv=document.createElement('canvas');terrCv.width=WW;terrCv.height=HH;terCvOwn=document.createElement('canvas');terCvOwn.width=WW;terCvOwn.height=HH;
+  const c=terrCv.getContext('2d'),img=c.createImageData(WW,HH),d=img.data,r=mulberry32(G.seed^0x5bd1e995);
+  const put=(x,y,h)=>{const i=(y*WW+x)*4;d[i]=h>>16&255;d[i+1]=h>>8&255;d[i+2]=h&255;d[i+3]=255};
+  const land=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&terr[y*W+x]!==WATER;
+  const mini=document.createElement('canvas');mini.width=W;mini.height=H;const mc=mini.getContext('2d'),mi=mc.createImageData(W,H);
+  const MC={0:0x2b4e70,1:0xcdb67e,2:0x5f8f3e,3:0x3a672c,4:0x7f8c4c,5:0x8a847c};
+  for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){const i=ty*W+tx,t=terr[i];
+    const mm=MC[t];mi.data[i*4]=mm>>16&255;mi.data[i*4+1]=mm>>8&255;mi.data[i*4+2]=mm&255;mi.data[i*4+3]=255;
+    let near=false;if(t===WATER)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(land(tx+dx,ty+dy))near=true;
+    for(let py=0;py<TS;py++)for(let px=0;px<TS;px++){const X=tx*TS+px,Y=ty*TS+py,q=r();let col;
+      if(t===WATER){
+        const foam=(px===0&&land(tx-1,ty))||(px===TS-1&&land(tx+1,ty))||(py===0&&land(tx,ty-1))||(py===TS-1&&land(tx,ty+1));
+        const edge2=(px<=1&&land(tx-1,ty))||(px>=TS-2&&land(tx+1,ty))||(py<=1&&land(tx,ty-1))||(py>=TS-2&&land(tx,ty+1));
+        col=foam?0x9fc4d6:edge2?0x4f86ab:near?(q<.5?0x3d6e94:0x3a6990):(q<.5?0x2b4e70:0x29496a);
+        if(!foam&&q<.012)col=0x5f90b4}
+      else if(t===SAND)col=q<.06?0xb39b65:q<.4?0xd2bb84:q<.75?0xc9b179:0xd9c38e;
+      else if(t===GRASS)col=q<.05?0x4a7a30:q<.4?0x5c8c3b:q<.75?0x64953f:0x58873a;
+      else if(t===FOREST)col=q<.5?0x45712e:0x4b7833;
+      else if(t===HILL)col=q<.5?0x7a8848:0x738143;
+      else col=q<.5?0x6f6a63:0x67625b;
+      put(X,Y,col)}}
+  c.putImageData(img,0,0);mc.putImageData(mi,0,0);miniBase=mini;
+  const f=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
+  const deco=[];
+  for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){const t=terr[ty*W+tx],X=tx*TS,Y=ty*TS;
+    if(t===GRASS){const q=r();if(q<.02){const yy=Y+ri2(r,4,6);deco.push({y:yy,k:'tree',x:X+ri2(r,2,5),yy,s:1})}
+      else if(q<.09){const gx=X+ri2(r,1,6),gy=Y+ri2(r,1,6);f(gx,gy,1,2,'#3f6a27');f(gx+1,gy+1,1,1,'#3f6a27')}
+      else if(q<.105)f(X+ri2(r,1,6),Y+ri2(r,1,6),1,1,r()<.5?'#e3d36b':'#d98a8a')}
+    else if(t===FOREST){const n=r()<.6?2:1;for(let k=0;k<n;k++){const yy=Y+ri2(r,3,7);deco.push({y:yy,k:r()<.3?'pine':'tree',x:X+ri2(r,1,6),yy,s:r()<.3?1:0})}}
+    else if(t===HILL){if(r()<.55){const yy=Y+ri2(r,3,7);deco.push({y:yy,k:'hill',x:X+ri2(r,2,6),yy})}}
+    else if(t===MOUNT)deco.push({y:Y+7,k:'mount',x:X+4+ri2(r,-1,1),yy:Y+8,snow:hgt[ty*W+tx]>.85,h:ri2(r,8,11)});
+    else if(t===SAND&&r()<.04)f(X+ri2(r,1,6),Y+ri2(r,1,6),2,1,'#a89060');}
+  deco.sort((a,b)=>a.y-b.y);
+  for(const o of deco){const x=o.x,y=o.yy;
+    if(o.k==='tree')mask(f,x,y,o.s?TREE_S:TREE_B,TPAL);
+    else if(o.k==='pine')mask(f,x,y,PINE,PPAL);
+    else if(o.k==='hill')mask(f,x,y,HILLM,HPAL);
+    else if(o.k==='mount'){const h=o.h;for(let i=0;i<h;i++){const hw=Math.round(i*.75)+1,yy=y-h+i;
+        f(x-hw-1,yy,hw*2+2,1,'#3a3632');f(x-hw,yy,hw,1,i<3&&o.snow?'#f0f0f0':'#a39d94');f(x,yy,hw,1,i<3&&o.snow?'#c9cdd2':'#625d57')}
+      f(x-Math.round(h*.75)-2,y,Math.round(h*.75)*2+4,1,'#3a3632')}}
+  for(const rd of G.roads||[])drawRoad(rd);
+}
+function ri2(r,a,b){return a+Math.floor(r()*(b-a+1))}
+
+const HILLM=['..aaa...','.abbbbc.','abbbbbcc'],HPAL={a:'#9aa862',b:'#86944f',c:'#5f6c37'};
+const TREE_B=["..ooo..",".oHHgo.","oHgggdo","oggggdo","ogggddo",".oddddo","..oTo..","...T..."];
+const TREE_S=[".ooo.","oHgdo","oggdo",".oTo.","..T.."];
+const PINE=["...o...","..oHo..","..ogo..",".oHgdo.",".oggdo.","oHggddo","ooooooo","...T..."];
+const TPAL={o:'#1b3416',H:'#4f8f3c',g:'#2f5a26',d:'#244a1e',T:'#4a3220'},PPAL={o:'#132a17',H:'#3a7a44',g:'#23502c',d:'#1d4325',T:'#4a3220'};
+function mask(f,x,y,rows,pal){const w=rows[0].length,h=rows.length,x0=x-(w>>1),y0=y-h+1;
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=rows[j][i];if(ch!=='.')f(x0+i,y0+j,1,1,pal[ch])}}
+
+// ================= Batallas =================
+let battles=[],corpses=[],fx=[];
+function startBattle(a,b,siegeId){
+  if(a.kind==='garrison'&&b.kind!=='garrison'){[a,b]=[b,a]}
+  const B={id:nid(),a:a.id,b:b.id,siege:siegeId||null,units:[],t:0,cmd:'charge',rt:0,init:[fit(a).length,fit(b).length],luck:[.7+R()*.6,.7+R()*.6],mor:[baseMorale(a),baseMorale(b)]};
+  let dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<.01){dx=1;dy=0;d=1}dx/=d;dy/=d;
+  const cx=siegeId?b.x+dx*2.4:(a.x+b.x)/2,cy=siegeId?b.y+dy*2.4:(a.y+b.y)/2;B.cx=cx;B.cy=cy;B.dx=dx;B.dy=dy;
+  const place=(p,side,sg)=>{const F=fit(p),n=F.length,per=6;[...F.filter(s=>!s.lord),...F.filter(s=>s.lord)].forEach((s,i)=>{const rank=Math.floor(i/per),inRank=Math.min(per,n-rank*per),file=i%per-(inRank-1)/2;
+    const bx=cx+dx*sg*(2.8+rank*1.1),by=cy+dy*sg*(2.8+rank*1.1);
+    let ux=bx-dy*file*1.45+(R()-.5)*.2,uy=by+dx*file*1.45+(R()-.5)*.2;if(!passableAt(ux,uy)){const np=nearestPass(ux,uy);if(np&&dist(np[0]+.5,np[1]+.5,ux,uy)<4){ux=np[0]+.5+(R()-.5)*.6;uy=np[1]+.5+(R()-.5)*.6}else{ux=p.x;uy=p.y}}
+    B.units.push({s,side,x:ux,y:uy,cd:R()*.6,tgt:null,rt:0,face:-sg*Math.sign(dx||1)})})};
+  place(a,0,1);place(b,1,-1);a.inBattle=B.id;b.inBattle=B.id;a.path=[];b.path=[];a.moving=b.moving=false;battles.push(B);
+  if(a.kind==='player'||b.kind==='player'){const foe=a.kind==='player'?b:a;
+    toast(siegeId?`¡Asalto a ${settl(siegeId).name}!`:`¡Batalla contra ${foe.kind==='garrison'?'la guarnición':partyName(foe).toLowerCase()}!`);popClose()}
+  return B;
+}
+function sideOfPlayer(B){const a=party(B.a),b=party(B.b);return a&&a.kind==='player'?0:b&&b.kind==='player'?1:-1}
+function updateBattle(B,dt){
+  B.t+=dt; const ps=sideOfPlayer(B), U=B.units;for(const u of U){u.px=u.x;u.py=u.y}
+  for(const u of U){if(u.s.hp<=0)continue;
+    if(ps===u.side&&B.cmd==='retreat'){const sg=u.side===0?1:-1;u.x+=B.dx*sg*u.s.spd*1.1*dt;u.y+=B.dy*sg*u.s.spd*1.1*dt;u.mv=true;continue}
+    u.rt-=dt; if(u.rt<=0||!u.tgt||u.tgt.s.hp<=0){let best=null,bd=1e9;for(const v of U){if(v.side===u.side||v.s.hp<=0)continue;const d=dist(u.x,u.y,v.x,v.y);if(d<bd){bd=d;best=v}}u.tgt=best;u.rt=.35+R()*.2}
+    u.mv=false; if(!u.tgt)continue;
+    const dx=u.tgt.x-u.x,dy=u.tgt.y-u.y,d=Math.hypot(dx,dy); if(dx)u.face=dx>0?1:-1;
+    let hold=ps===u.side&&B.cmd==='hold';
+    if(u.s.lord&&d>1.6&&U.some(v=>v!==u&&v.side===u.side&&v.s.hp>0))hold=true; // el señor dirige desde atrás
+    if(d>.95){if(!hold||d<(u.s.lord?1.6:2.4)){const st=Math.min(d-.85,u.s.spd*dt);u.x+=dx/d*st;u.y+=dy/d*st;u.mv=true}}
+    else{u.cd-=dt;if(u.cd<=0){const t=u.tgt.s;let dmg=Math.max(1,Math.round(u.s.atk*(.6+R()*.8)*(B.luck?B.luck[u.side]:1)*(B.mor?.8+clamp(B.mor[u.side],0,100)/250:1))-t.def);
+      if(hold&&!u.s.lord)dmg+=1; t.hp-=dmg;u.cd=u.s.cdb*(.9+R()*.25);u.hit=.15;fx.push({x:u.tgt.x,y:u.tgt.y-.9,t:.25});
+      if(t.hp<=0){u.s.kills++;if(B.mor){const ts=u.tgt.side,al=B.units.filter(v=>v.s.hp>0),own=al.filter(v=>v.side===ts).length,en=al.length-own,odds=en/Math.max(1,own);B.mor[ts]-=40/Math.max(1,B.init[ts])*(1+.5*Math.max(0,odds-1))+(t.lord?25:0);B.mor[1-ts]=Math.min(100,B.mor[1-ts]+15/Math.max(1,B.init[1-ts]))}corpses.push({x:u.tgt.x,y:u.tgt.y,c:u.tgt.side===0?colOfSide(B,0):colOfSide(B,1),t:0})}}}
+    if(u.hit>0)u.hit-=dt}
+  // separación
+  for(let i=0;i<U.length;i++){const a=U[i];if(a.s.hp<=0)continue;for(let j=i+1;j<U.length;j++){const b=U[j];if(b.s.hp<=0)continue;
+    const dx=b.x-a.x,dy=b.y-a.y,d=dx*dx+dy*dy;if(d<.7&&d>1e-6){const k=(.84-Math.sqrt(d))*.5/Math.sqrt(d);a.x-=dx*k;a.y-=dy*k;b.x+=dx*k;b.y+=dy*k}}}
+  for(const u of U)if(!passableAt(u.x,u.y)){if(passableAt(u.px,u.y))u.y=u.py;else if(passableAt(u.x,u.py))u.x=u.px;else{u.x=u.px;u.y=u.py}}
+  const alive=[0,0];for(const u of U)if(u.s.hp>0)alive[u.side]++;
+  if(ps>=0){const L=U.find(u=>u.s.lord);if(L&&L.s.hp<=0)return endBattle(B,1-ps,false)}
+  if(B.cmd==='retreat'&&ps>=0){B.rt+=dt;if(B.rt>2.5)return endBattle(B,1-ps,true)}
+  if(alive[0]===0)return endBattle(B,1);if(alive[1]===0)return endBattle(B,0);
+  for(let s=0;s<2;s++){if(B.init[s]>1&&B.mor[s]<15){if(s===ps){B.broke=true;log('Tus hombres pierden el valor y se desbandan.',true)}return endBattle(B,1-s,s===ps)}}
+  if(B.t>120)endBattle(B,1);
+}
+function colOfSide(B,s){const p=party(s?B.b:B.a);return p?facColor(p.fac):'#555'}
+function endBattle(B,win,retreated){
+  battles=battles.filter(x=>x!==B);
+  const P=[party(B.a),party(B.b)],ps=sideOfPlayer(B);
+  P.forEach((p,i)=>{if(!p)return;p.inBattle=null;
+    const med=p.kind==='player'?(G.player.med||0):p.kind==='bandit'?0:12,dead=[],hurt=[];
+    for(const s of p.soldiers){if(s.hp>0||s.lord)continue;if(R()<survChance(s,med)){s.wounded=true;s.hp=1;hurt.push(s)}else dead.push(s)}
+    if(p.kind==='player'){if(dead.length)log(`Murieron en combate: ${dead.map(s=>s.name).join(', ')}.`,true);if(hurt.length)log(`${hurt.length} ${hurt.length>1?'hombres quedaron heridos':'hombre quedó herido'}; tu medicina los salvó de morir.`)}
+    const won=i===win; for(const s of p.soldiers){if(s.hp>0&&won){s.xp+=12+s.kills*6;if(s.lord||p.kind!=='player'){while(s.lvl<(s.lord?99:5)&&s.xp>=s.lvl*30){s.xp-=s.lvl*30;lvlUp(s);if(s.lord)log(`Tu señor subió a nivel ${s.lvl}.`)}}}s.kills=0}
+    p.soldiers=p.soldiers.filter(s=>s.hp>0||s.lord);const L=p.soldiers.find(s=>s.lord);if(L&&L.hp<=0)L.hp=Math.max(1,Math.round(L.maxhp*.15));
+    if(p.kind==='player'&&won){const ready=p.soldiers.filter(canUp).length;if(ready)toast(`${ready} ${ready>1?'hombres pueden':'hombre puede'} mejorar de rango. Ábrelo en Compañía.`)}});
+  const W_=P[win],L_=P[1-win]; if(!W_||!L_)return;
+  if(B.siege&&win===0){if(B.raid)raidVillage(settl(B.siege));else capture(settl(B.siege),W_)}
+  if(L_.kind!=='player'&&L_.kind!=='garrison'&&W_.kind!=='player')L_.soldiers=L_.soldiers.filter(s=>!s.wounded||R()<.5);
+  if(L_.kind==='player'){G.player.mev=(G.player.mev||0)-(retreated?8:15);const g0=G.player.gold;G.player.gold=Math.floor(G.player.gold*(retreated?.85:.6));if(!retreated)for(const k of GK)G.player.inv[k]=Math.floor((G.player.inv[k]||0)*.7);
+    const lost=[];L_.soldiers=L_.soldiers.filter(s=>{if(s.lord)return true;if(R()<(retreated?.12:.3)){lost.push(s.name);return false}return true});
+    log(retreated?`Te retiraste del combate. Perdiste ${g0-G.player.gold} de oro${lost.length?' y capturaron a '+lost.join(', '):''}.`:`Derrota. Tu señor quedó herido; perdiste ${g0-G.player.gold} de oro${lost.length?' y capturaron a '+lost.join(', '):''}.`,true);
+    L_.immune=15;L_.target=null;L_.path=[];
+    let safe=null,sd=1e9;for(const s of G.settlements){if(facWar(0,s.owner))continue;const d=dist(L_.x,L_.y,s.x,s.y);if(d<sd){sd=d;safe=s}}
+    if(safe){L_.target={type:'point',x:safe.x,y:safe.y+1};setPathTo(L_,safe.x,safe.y+1);toast(`Tus hombres se repliegan hacia ${safe.name}.`)}}
+  else if(L_.kind!=='garrison'){if(!L_.soldiers.length)G.parties=G.parties.filter(p=>p!==L_);else{L_.immune=6;goHome(L_)}}
+  if(W_.kind==='player'){const n=B.init[1-win];let gold=0,ren=0;
+    if(L_.kind==='bandit'){gold=7*n;ren=2}else if(L_.kind==='garrison'){gold=0;ren=3}else{gold=5*n;ren=4}
+    if(G.player.traits.includes('Ambicioso'))ren=Math.ceil(ren*1.5);G.player.gold+=gold;G.player.renown+=ren;
+    const capt=L_.kind==='garrison'?[]:L_.soldiers.filter(s=>!s.lord&&(s.wounded||R()<.35));L_.soldiers=L_.soldiers.filter(s=>!capt.includes(s));const cap=capt.length;
+    if(cap>0)addPrisoners(cap,L_.kind==='bandit'?10:Math.round(capt.reduce((a,x)=>a+16+x.lvl*4,0)/cap));
+    if(L_.kind!=='garrison'&&!L_.soldiers.length)G.parties=G.parties.filter(x=>x!==L_);
+    {const odds=n/Math.max(1,B.init[win]);G.player.mev=clamp((G.player.mev||0)+6+(odds>1?Math.min(10,Math.round((odds-1)*8)):0),-40,30)}
+    const qq=(G.player.quests||[]).find(q=>q.type==='bandits'&&q.target===L_.id);
+    if(L_.fac>0)addRel(0,L_.fac,-8);
+    log(`Victoria contra ${L_.kind==='garrison'?'la guarnición':partyName(L_).toLowerCase()}. +${gold} oro, +${ren} renombre${cap>0?', '+cap+' prisioneros':''}.`,true);
+    if(qq){if(!L_.soldiers.length||!G.parties.includes(L_))completeQuest(qq);else{G.parties=G.parties.filter(x=>x!==L_);completeQuest(qq)}}}
+  if(W_.kind!=='player'&&W_.kind!=='garrison'){W_.target=null;W_.think=0}
+}
+function capture(s,p){
+  if(!s)return;const old=s.owner,nw=p.fac;if(old===nw)return;s.owner=nw;s.prevOwner=old;{const pp=PP();if(pp.inside===s.id&&facWar(0,nw)){leaveSettlement();toast(`${s.name} cayó en manos enemigas y tuviste que huir.`)}}const g=party(s.gar);g.fac=nw;g.soldiers=[];
+  if(p.kind==='army'){const n=Math.min(3,p.soldiers.length-1);for(let i=0;i<n;i++)g.soldiers.push(p.soldiers.pop())}
+  if(p.kind==='player'){const gold=s.type==='castle'?80:30,ren=s.type==='castle'?12:6;G.player.gold+=gold;G.player.renown+=ren;
+    log(`¡Tomaste ${s.name}! +${gold} oro, +${ren} renombre.`,true);if(s.type==='castle')setTimeoutSafe(()=>sackModal(s))}
+  else log(`${s.name} cayó en manos de ${facName(nw)}.`,old===0||nw===G.player.liege);
+  if(old>0){const k=G.kingdoms[old];const rest=G.settlements.filter(x=>x.owner===old);
+    if(!rest.length)fallKingdom(k);else if(k.capital===s.id){const c=rest.find(x=>x.type==='castle')||rest[0];k.capital=c.id;log(`${k.name} traslada su corte a ${c.name}.`)}}
+  rebuildTerritory();
+}
+function fallKingdom(k){k.alive=false;for(const w of Object.keys(G.wars)){const[a,b]=w.split('|').map(Number);if(a===k.id||b===k.id)delete G.wars[w]}
+  for(const p of G.parties)if(p.fac===k.id&&p.kind!=='garrison'){p.fac=-1;p.kind='bandit';p.name='Remanentes de '+k.name}
+  if(G.player.liege===k.id)G.player.liege=null;log(`El reino de ${k.name} ha caído. Sus soldados vagan como bandidos.`,true)}
+
+// ================= Partidas en el mapa =================
+function setPathTo(p,x,y){p.path=findPath(p.x,p.y,x,y)||[]}
+function goHome(p){const k=G.kingdoms[p.fac];const h=k&&k.alive?settl(k.capital):null;if(!h){p.target=null;p.path=[];return}p.target={type:'home',id:h.id};setPathTo(p,h.x,h.y)}
+function speedOf(p){return p.kind==='player'?2.2:p.kind==='army'?1.55:p.kind==='patrol'?1.9:1.75}
+function moveAlong(p,dt){
+  if(!p.path||!p.path.length){p.moving=false;return}
+  let sp=speedOf(p)*(p.immune>0&&p.kind!=='player'?1.25:1)*SPEEDF[terrAt(p.x,p.y)]*(road[clamp(p.y|0,0,H-1)*W+clamp(p.x|0,0,W-1)]?1.3:1)*(p.kind==='player'?(invLoad()>capacity()?.6:1)*(G.player.morale>70?1.08:G.player.morale<30?.9:1)*(1-.3*p.soldiers.filter(s=>s.wounded).length/Math.max(1,p.soldiers.length)):1)*dt;
+  while(sp>0&&p.path.length){const[tx,ty]=p.path[0],dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);if(dx)p.face=dx>0?1:-1;
+    if(d<=sp){p.x=tx;p.y=ty;sp-=d;p.path.shift()}else{p.x+=dx/d*sp;p.y+=dy/d*sp;sp=0}}
+  p.moving=true;
+}
+function nearestHostile(p,r){let best=null,bd=r;for(const q of G.parties){if(q===p||q.kind==='garrison'||q.inBattle||q.inside||!facWar(p.fac,q.fac))continue;
+  const d=dist(p.x,p.y,q.x,q.y);if(d<bd){bd=d;best=q}}return best}
+function chase(p,q){p.target={type:'party',id:q.id};if(dist(p.x,p.y,q.x,q.y)<7&&lineClear(p.x,p.y,q.x,q.y))p.path=[[q.x,q.y]];else setPathTo(p,q.x,q.y)}
+function roam(p,r){for(let t=0;t<20;t++){const x=p.x+(R()-.5)*2*r,y=p.y+(R()-.5)*2*r;if(inMain(x,y)){p.target={type:'point',x,y};setPathTo(p,x,y);return}}}
+function chooseTarget(k,from){let best=null,bs=1e9;for(const s of G.settlements){if(!facWar(k.id,s.owner))continue;const g=party(s.gar);
+  const sc=dist(from.x,from.y,s.x,s.y)+g.soldiers.length*1.5;if(sc<bs){bs=sc;best=s}}return best}
+function aiThink(p){
+  if(p.kind==='bandit'){const q=nearestHostile(p,5);if(q&&strength(p)>strength(q)*1.1){chase(p,q);return}
+    if(p.target&&p.target.type==='party'){p.target=null}if(!p.path.length){if(R()<.5)roam(p,14)}return}
+  const k=G.kingdoms[p.fac]; if(!k||!k.alive){p.kind='bandit';p.fac=-1;return}
+  if(p.kind==='patrol'){const q=nearestHostile(p,6);if(q&&(q.kind==='bandit'||q.kind==='player')&&strength(p)>=strength(q)*.85){chase(p,q);return}
+    if(p.target&&p.target.type==='party')p.target=null;
+    if(!p.path.length){const mine=G.settlements.filter(s=>s.owner===p.fac);if(mine.length){const s=pick(mine);p.target={type:'point',x:s.x,y:s.y};setPathTo(p,s.x+(R()-.5)*3,s.y+(R()-.5)*3)}}return}
+  // ejército
+  const q=nearestHostile(p,4.5);if(q&&strength(p)>=strength(q)*.9){chase(p,q);return}
+  const t=p.target;
+  if(t&&t.type==='settlement'){const s=settl(t.id);if(s&&facWar(p.fac,s.owner)){if(!p.path.length)setPathTo(p,s.x,s.y);return}}
+  if(t&&t.type==='home'){const h=settl(t.id);if(h&&dist(p.x,p.y,h.x,h.y)<1.5){const s2=p.soldiers.length>=6?chooseTarget(k,p):null;
+      if(s2){p.target={type:'settlement',id:s2.id};setPathTo(p,s2.x,s2.y)}else{k.man+=p.soldiers.length;G.parties=G.parties.filter(x=>x!==p)}return}
+    if(!p.path.length)goHome(p);return}
+  const s2=p.soldiers.length>=5?chooseTarget(k,p):null;
+  if(s2){p.target={type:'settlement',id:s2.id};setPathTo(p,s2.x,s2.y)}
+  else if(facWar(p.fac,0)&&dist(p.x,p.y,PP().x,PP().y)<35&&p.soldiers.length>=5){chase(p,PP())}
+  else goHome(p);
+}
+function updateParties(dt){
+  const pp=PP();
+  for(const p of G.parties){if(p.kind==='garrison'||p.inBattle)continue;if(p.immune>0)p.immune-=dt;
+    if(p.kind==='player'){updatePlayer(p,dt);continue}
+    p.think=(p.think||0)-dt;if(p.think<=0){p.think=.7+R()*.5;aiThink(p)}
+    if(p.target&&p.target.type==='party'){const q=party(p.target.id);if(!q||q.inBattle||q.inside||!facWar(p.fac,q.fac)||dist(p.x,p.y,q.x,q.y)>12){p.target=null;p.path=[]}
+      else if(dist(p.x,p.y,q.x,q.y)<7&&lineClear(p.x,p.y,q.x,q.y))p.path=[[q.x,q.y]]}
+    moveAlong(p,dt)}
+  // encuentros
+  const mv=G.parties.filter(p=>p.kind!=='garrison'&&!p.inBattle&&!p.inside);
+  for(let i=0;i<mv.length;i++){const p=mv[i];if(p.inBattle||p.immune>0||G.enc)continue;
+    for(let j=i+1;j<mv.length;j++){const q=mv[j];if(q.inBattle||q.immune>0)continue;
+      if(facWar(p.fac,q.fac)&&dist(p.x,p.y,q.x,q.y)<1.15&&p.soldiers.length&&q.soldiers.length){
+        if(p.kind==='player'||q.kind==='player'){openEncounter(p.kind==='player'?q:p);break}
+        startBattle(p,q);break}}
+    if(p.inBattle||G.enc)continue;const t=p.target;
+    if(t&&t.type==='settlement'){const s=settl(t.id);if(s&&facWar(p.fac,s.owner)&&dist(p.x,p.y,s.x,s.y)<1.5){const g=party(s.gar);
+      if(g.inBattle)continue;
+      if(p.kind==='player'){if(!g.soldiers.length){p.target=null;p.path=[];if(t.mode==='raid')raidVillage(s);else{if(s.type==='castle')G.player.inv.madera=Math.max(0,(G.player.inv.madera||0)-CASTLE_WOOD);capture(s,p)}}else openEncounter(g,s,t.mode);continue}
+      if(!g.soldiers.length){capture(s,p);p.target=null;p.path=[]}else startBattle(p,g,s.id)}}}
+}
+
+// ================= Jugador =================
+const keys={};let pRest=false,pNear=null;
+function updatePlayer(p,dt){
+  if(p.inside){pNear=settl(p.inside);pRest=true;p.moving=false;return}
+  let vx=(keys.r?1:0)-(keys.l?1:0),vy=(keys.d?1:0)-(keys.u?1:0);
+  if(vx||vy){p.path=[];p.target=null;const l=Math.hypot(vx,vy),sp=speedOf(p)*SPEEDF[terrAt(p.x,p.y)]*dt,nx=p.x+vx/l*sp,ny=p.y+vy/l*sp;
+    if(passableAt(nx,ny)){p.x=nx;p.y=ny}else if(passableAt(nx,p.y))p.x=nx;else if(passableAt(p.x,ny))p.y=ny; if(vx)p.face=vx>0?1:-1;p.moving=true}
+  else{const t=p.target;
+    if(t&&t.type==='party'){const q=party(t.id);if(!q||!facWar(0,q.fac)){p.target=null;p.path=[]}else{p.think=(p.think||0)-dt;if(p.think<=0){p.think=.4;
+      if(dist(p.x,p.y,q.x,q.y)<7&&lineClear(p.x,p.y,q.x,q.y))p.path=[[q.x,q.y]];else setPathTo(p,q.x,q.y)}}}
+    moveAlong(p,dt); if(!p.path.length&&t&&t.type==='point')p.target=null;
+    if(t&&t.type==='enter'){const s=settl(t.id);if(!s||facWar(0,s.owner)){p.target=null}else if(dist(p.x,p.y,s.x,s.y)<1.8||!p.path.length&&dist(p.x,p.y,s.x,s.y)<3){enterSettlement(s)}}}
+  pNear=null;let bd=1.7;for(const s of G.settlements){const d=dist(p.x,p.y,s.x,s.y);if(d<bd){bd=d;pNear=s}}
+  pRest=!!(pNear&&!facWar(0,pNear.owner)&&!p.moving);
+}
+function playerDaily(){
+  const p=PP(),pl=G.player;let need=eatNeed(),hungry=false;
+  while(need>0){if(pl.rac>=need){pl.rac-=need;need=0;break}need-=pl.rac;pl.rac=0;const k=FOODK.filter(x=>(pl.inv[x]||0)>0).sort((x,y)=>(pl.inv[y]||0)-(pl.inv[x]||0))[0];if(!k){hungry=true;break}pl.inv[k]--;pl.rac+=GOODS[k].r}
+  const wage=p.soldiers.filter(s=>!s.lord).length;pl.gold-=wage;let unpaid=false;if(pl.gold<0){pl.gold=0;unpaid=true}
+  if(pl.liege!=null&&G.kingdoms[pl.liege].alive)pl.gold+=3+Math.floor(pl.renown/15);
+  for(const s of G.settlements)if(s.owner===0)pl.gold+=s.type==='castle'?7:3;
+  pl.med=pl.med||0;const wn=p.soldiers.filter(s=>s.wounded).length;
+  for(const s of p.soldiers){if(!hungry){s.hp=Math.min(s.maxhp,s.hp+Math.round((pRest?7:2)*(1+pl.med/100)*(s.wounded?1.5:1)))}else if(s.wounded&&R()<.1&&!s.lord){s.hp=0}
+    if(s.wounded&&s.hp>=s.maxhp*.6){s.wounded=false}}
+  const starved=p.soldiers.filter(s=>s.hp<=0&&!s.lord);if(starved.length){p.soldiers=p.soldiers.filter(s=>!starved.includes(s));log(`Murieron por falta de cuidados: ${starved.map(s=>s.name).join(', ')}.`,true)}
+  if(wn){pl.med=Math.min(100,pl.med+.25*Math.sqrt(wn));const healed=wn-p.soldiers.filter(s=>s.wounded).length;if(healed>0)toast(`${healed} ${healed>1?'heridos se recuperaron':'herido se recuperó'}.`)}
+  pl.hungry=hungry;pl.unpaid=unpaid;pl.morale=pl.morale??60;const tgt=moraleTarget();pl.morale=clamp(pl.morale+clamp((tgt-pl.morale)*.08,-2.5,2.5),0,100);pl.mev=(pl.mev||0)*.95;
+  if(pl.morale<25){const gone=[];p.soldiers=p.soldiers.filter(s=>{if(s.lord||s.traits.includes('Leal'))return true;if(R()<.06){gone.push(s.name);return false}return true});
+    if(gone.length)log(`Con la moral por los suelos, desertaron: ${gone.join(', ')}.`,true)}
+  if((hungry||unpaid)&&G.day%3===0)toast(hungry?'Tus hombres pasan hambre y la moral se hunde. Compra comida en un mercado.':'No puedes pagar a tus hombres y la moral se hunde.')
+  if(pl.peaceCD>0)pl.peaceCD--;
+  const days=Math.floor(rations()/eatNeed());if(!hungry&&days<3&&G.day%2===0)toast('Te queda comida para muy pocos días. Compra grano, pescado o ganado en un mercado.');
+  if(pl.pris&&pl.pris.n>0&&pl.pris.n>p.soldiers.length*2&&R()<.3){const e=Math.ceil(pl.pris.n*.15),v=Math.round(pl.pris.v/pl.pris.n);pl.pris.n-=e;pl.pris.v-=e*v;log(`Escaparon ${e} prisioneros: tienes pocos hombres para vigilarlos.`,true)}
+  questsDaily();
+}
+
+// ================= Ciclo diario =================
+function daily(){
+  G.day++;const k0=G.kingdoms;
+  if(G.day%60===0){log(`Comienza el año ${1200+G.day/60}.`);G.player.age++;
+    for(const k of k0){if(k.isPlayer||!k.alive)continue;k.ruler.age++;const ch=k.ruler.age>50?(k.ruler.age-45)*.03:.012;
+      if(R()<ch){const old=rulerTitle(k),age=k.ruler.age;k.ruler=makeRuler(k);k.ruler.age=ri(16,40);
+        log(`Murió ${old} de ${k.name} a los ${age} años. Le sucede ${k.ruler.female?'su hija':'su hijo'}, ${rulerTitle(k)}.`,G.player.liege===k.id)}}}
+  econDaily();
+  if(G.day%4===0)for(const s of G.settlements){const mx=s.type==='castle'?5:3;if(s.recruits<mx)s.recruits++}
+  for(const k of k0){if(k.isPlayer||!k.alive)continue;const mine=G.settlements.filter(s=>s.owner===k.id);if(!mine.length)continue;
+    for(const s of mine){k.gold+=s.type==='castle'?4:2;k.man+=s.type==='castle'?.7:.35;const g=party(s.gar),tg=s.type==='castle'?14:5;
+      if(!g.inBattle&&g.soldiers.length<tg&&k.man>=1){g.soldiers.push(makeSoldier(s.type==='castle'?ri(1,3):ri(1,2),1,s.type==='castle'?ri(1,k.gold>200?3:2):1));k.man-=1}}
+    k.man=Math.min(k.man,15+mine.length*3);k.gold=Math.min(k.gold,300);
+    const enemies=k0.filter(e=>e.alive&&e.id!==k.id&&facWar(k.id,e.id));
+    const armies=G.parties.filter(p=>p.fac===k.id&&p.kind==='army');
+    if(enemies.length&&armies.length<1+Math.floor(mine.length/4)&&k.man>=10)spawnArmy(k,mine);
+    if(!G.parties.some(p=>p.fac===k.id&&p.kind==='patrol')&&k.man>=4&&R()<.25)spawnPatrol(k,mine);
+    const amb=k.ruler.traits.includes('Ambicioso');
+    if(k.gold>=90&&mine.length<8&&R()<(amb?.06:.03)){if(foundVillage(k))k.gold-=80}}
+  // diplomacia
+  const ks=k0.filter(k=>k.alive&&!k.isPlayer);
+  for(let i=0;i<ks.length;i++)for(let j=i+1;j<ks.length;j++){const a=ks[i],b=ks[j],kk=key(a.id,b.id);let r=G.rel[kk]??0;
+    r+=(R()-.5)*.8;const ca=settl(a.capital),cb=settl(b.capital);if(ca&&cb&&dist(ca.x,ca.y,cb.x,cb.y)<60)r-=.12;
+    for(const x of[a,b]){if(x.ruler.traits.includes('Belicoso'))r-=.1;if(x.ruler.traits.includes('Pacífico'))r+=.08}
+    G.rel[kk]=clamp(r,-100,100);const wc=x=>ks.filter(y=>y!==x&&atWarDirect(x.id,y.id)).length;
+    if(!atWarDirect(a.id,b.id)){if(r<-45&&R()<.03&&wc(a)<2&&wc(b)<2){const[x,y]=R()<.5?[a.id,b.id]:[b.id,a.id];declareWar(x,y)}}
+    else{const len=G.day-G.wars[kk];if(len>40&&R()<.02+(len>100?.02:0))makePeace(a.id,b.id)}}
+  for(const k of ks){const kk=key(0,k.id),r=G.rel[kk]??0;G.rel[kk]=clamp(r+(r<0?.06:-.02),-100,100);
+    if(!atWarDirect(0,k.id)&&G.player.liege!==k.id&&r<-55&&R()<.03&&G.player.renown>=5)declareWar(k.id,0)}
+  // bandidos
+  if(G.parties.filter(p=>p.kind==='bandit').length<6&&R()<.14){const pp=PP();
+    for(let t=0;t<40;t++){const x=ri(2,W-3),y=ri(2,H-3),tt=terr[y*W+x];if((tt!==FOREST&&tt!==HILL)||!inMain(x,y)||!farFromSettl(x,y,9)||dist(x,y,pp.x,pp.y)<12)continue;
+      const b={id:nid(),kind:'bandit',fac:-1,x:x+.5,y:y+.5,soldiers:[],path:[],target:null,immune:0,face:1,name:'Bandidos'};const n=ri(3,7);
+      for(let i=0;i<n;i++)b.soldiers.push(makeSoldier(R()<.2?2:1,.82,R()<.2?1:0));G.parties.push(b);break}}
+  for(const p of G.parties)if(p.kind!=='player'&&!p.inBattle)for(const s of p.soldiers){s.hp=Math.min(s.maxhp,s.hp+3);if(s.wounded&&s.hp>=s.maxhp*.6)s.wounded=false}
+  playerDaily();
+  if(G.day%15===0&&!battles.length)saveGame(true);
+}
+function spawnArmy(k,mine){const c=settl(k.capital)||mine[0],n=Math.min(Math.floor(k.man),8+mine.length*2,30);k.man-=n;
+  const p={id:nid(),kind:'army',fac:k.id,x:c.x+.6,y:c.y+.8,soldiers:[],path:[],target:null,immune:0,face:1};
+  for(let i=0;i<n;i++)p.soldiers.push(makeSoldier(ri(1,3),1,ri(1,k.gold>200?3:2)));G.parties.push(p);p.think=0;
+  const t=chooseTarget(k,p),L=G.player.liege;if(t&&(t.owner===0||k.id===L||t.owner===L||R()<.25))log(`${k.name} reúne un ejército de ${n} hombres y marcha sobre ${t.name}.`,t.owner===0)}
+function spawnPatrol(k,mine){const c=pick(mine),n=Math.min(Math.floor(k.man),ri(4,6));k.man-=n;
+  const p={id:nid(),kind:'patrol',fac:k.id,x:c.x+.6,y:c.y+.6,soldiers:[],path:[],target:null,immune:0,face:1};for(let i=0;i<n;i++)p.soldiers.push(makeSoldier(ri(1,2),1,1));G.parties.push(p)}
+
+// ================= Paso de simulación =================
+function update(dt){
+  G.dayT+=dt;while(G.dayT>=DAY){G.dayT-=DAY;daily()}
+  updateParties(dt);
+  for(const B of [...battles])updateBattle(B,dt);
+  for(const c of corpses)c.t+=dt;corpses=corpses.filter(c=>c.t<30);
+  for(const f of fx)f.t-=dt;fx=fx.filter(f=>f.t>0);
+}
+function step(dt){const n=Math.ceil(dt/.05),s=dt/n;for(let i=0;i<n;i++)update(s)}
+
+// ================= Guardar =================
+function saveGame(quiet){try{if(battles.length){if(!quiet)toast('No puedes guardar en mitad de una batalla.');return}
+  const data=JSON.stringify({v:3,NID,G:{...G,parties:G.parties.map(p=>({...p,path:[],inBattle:null}))}});localStorage.setItem(SAVEKEY,data);if(!quiet)toast('Partida guardada.')}catch(e){if(!quiet)toast('No se pudo guardar en este navegador.')}}
+function hasSave(){try{return!!localStorage.getItem(SAVEKEY)}catch(e){return false}}
+function loadGame(){try{const d=JSON.parse(localStorage.getItem(SAVEKEY));if(!d||d.v!==3)return false;genTerrain(d.G.seed);G=d.G;NID=d.NID;battles=[];corpses=[];fx=[];G.enc=null;road=new Uint8Array(W*H);for(const r of G.roads||[])for(const[x,y]of r)road[(y|0)*W+(x|0)]=1;
+  for(const p of G.parties){p.path=[];p.inBattle=null;if(p.kind!=='garrison'&&p.kind!=='player')p.target=null;if(p.kind==='player'){p.inside=null;p.target=null}}
+  own=null;buildTerrainCanvas();rebuildTerritory();return true}catch(e){return false}}
+
+// ================= Economía, equipo y rangos =================
+const GOODS={grano:{n:'Grano',p:10,r:2},pescado:{n:'Pescado',p:12,r:2},ganado:{n:'Ganado',p:32,r:6},madera:{n:'Madera',p:14},hierro:{n:'Hierro',p:34},lana:{n:'Lana',p:22},vino:{n:'Vino',p:40},sal:{n:'Sal',p:26}};
+const GK=Object.keys(GOODS),FOODK=['grano','pescado','ganado'];
+const PROD={grano:'campos de trigo',pescado:'pescadores',ganado:'ganadería',madera:'leñadores y carpinteros',hierro:'mina de hierro',lana:'pastores de ovejas',vino:'viñedos',sal:'salinas'};
+const EQ=[{n:'Harapos',atk:0,def:0,hp:0,c:0},{n:'Gambesón y lanza',atk:2,def:1,hp:4,c:35},{n:'Cota de malla',atk:3,def:2,hp:8,c:90},{n:'Armadura de placas',atk:5,def:4,hp:12,c:220}];
+const TIERS=[{r:0,n:'Caballero errante',m:12},{r:20,n:'Señor menor',m:20},{r:50,n:'Capitán',m:32},{r:100,n:'Barón',m:48},{r:200,n:'Conde',m:70},{r:400,n:'Duque',m:100}];
+const RAID_MIN=15,TAKE_VILLAGE_MIN=10,CASTLE_MIN=30,CASTLE_WOOD=8;
+function tierOf(){let t=0;for(let i=0;i<TIERS.length;i++)if(G.player.renown>=TIERS[i].r)t=i;return t}
+function partyLimit(){return TIERS[tierOf()].m+lordOf().lvl}
+function menOf(){return PP().soldiers.length-1}
+function capacity(){return 30+12*PP().soldiers.length}
+function invLoad(){let n=0;for(const k of GK)n+=G.player.inv[k]||0;return n}
+function setEq(s,t){const a=EQ[s.eq||0],b=EQ[t];s.atk+=b.atk-a.atk;s.def+=b.def-a.def;s.maxhp+=b.hp-a.hp;s.hp=clamp(s.hp+Math.max(0,b.hp-a.hp),1,s.maxhp);s.eq=t}
+function rations(){const pl=G.player;let r=pl.rac||0;for(const k of FOODK)r+=(pl.inv[k]||0)*GOODS[k].r;return r}
+function eatNeed(){return PP().soldiers.reduce((a,s)=>a+(s.traits.includes('Glotón')?2:1),0)}
+function pickProduct(x,y){let w=0,m=0,f=0,sd=0;for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const t=terrAt(x+dx,y+dy);if(t===WATER)w++;else if(t===MOUNT||t===HILL)m++;else if(t===FOREST)f++;else if(t===SAND)sd++}
+  if(w>14&&R()<.75)return'pescado';if(m>8&&R()<.8)return'hierro';if(f>14&&R()<.8)return'madera';if(sd>6&&R()<.4)return'sal';
+  const q=R();return q<.38?'grano':q<.62?'ganado':q<.8?'lana':q<.93?'vino':'madera'}
+function initStock(s){s.stock={};if(s.type==='castle'){for(const k of GK)s.stock[k]=ri(6,18)}else{s.prod=pickProduct(s.x,s.y);s.stock[s.prod]=ri(12,24);if(s.prod!=='grano')s.stock.grano=ri(3,8);
+  if(s.prod==='pescado'){let b=null;for(let r=1;r<6&&!b;r++)for(let a=0;a<12&&!b;a++){const x=Math.round(s.x+Math.cos(a/12*6.283)*r),y=Math.round(s.y+Math.sin(a/12*6.283)*r);if(terrAt(x,y)===WATER)b=[x+.5,y+.5]}s.boat=b}}
+  s.raided=0}
+function price(s,k){const g=GOODS[k],st=s.stock[k]||0;
+  if(s.type==='village'){if(k===s.prod)return Math.max(2,Math.round(g.p*clamp(1.15-st/45,.45,1.15)));return Math.max(2,Math.round(g.p*clamp(1.35-st/30,.8,1.5)))}
+  return Math.max(2,Math.round(g.p*clamp(1.6-st/25,.6,1.8)))}
+const buyP=(s,k)=>Math.ceil(price(s,k)*(G.player.traits.includes('Astuto')?1:1.1)),sellP=(s,k)=>Math.floor(price(s,k)*.9);
+function nearestCastleOf(s){let b=null,bd=1e9;for(const c of G.settlements){if(c.type!=='castle')continue;const d=dist(s.x,s.y,c.x,c.y)*(c.owner===s.owner?1:2.5);if(d<bd){bd=d;b=c}}return b}
+function econDaily(){
+  for(const s of G.settlements){if(!s.stock)initStock(s);
+    if(s.type==='village'){if(s.raided>0){s.raided--;continue}
+      s.stock[s.prod]=Math.min(60,(s.stock[s.prod]||0)+ri(2,4));if(s.prod!=='grano'&&R()<.4)s.stock.grano=Math.min(20,(s.stock.grano||0)+1);
+      for(const k of GK)if(k!==s.prod&&k!=='grano'&&(s.stock[k]||0)>0&&R()<.3)s.stock[k]--;
+      if((s.stock[s.prod]||0)>12){const c=nearestCastleOf(s);if(c){s.stock[s.prod]-=2;c.stock[s.prod]=(c.stock[s.prod]||0)+2}}}
+    else for(const k of GK){const v=s.stock[k]||0;if(v>0&&R()<.55)s.stock[k]=v-1}}}
+// prisioneros
+function addPrisoners(n,val){const pl=G.player;pl.pris=pl.pris||{n:0,v:0};pl.pris.n+=n;pl.pris.v+=n*val}
+// ---- Tareas ----
+function questText(q){if(q.type==='bandits'){const b=party(q.target);return`Acabar con ${b?partyName(b).toLowerCase()+' ('+b.soldiers.length+' hombres)':'unos bandidos'} cerca de ${settl(q.giver)?.name||'—'}`}
+  return`Llevar ${q.qty} de ${GOODS[q.good].n} a ${settl(q.giver)?.name||'—'}`}
+function makeOffers(s){if(s.offerDay!=null&&G.day-s.offerDay<10&&s.offers)return s.offers;s.offerDay=G.day;s.offers=[];
+  // cazar bandidos
+  let b=null,bd=28;for(const p of G.parties){if(p.kind!=='bandit'||p.inBattle)continue;const d=dist(p.x,p.y,s.x,s.y);if(d<bd){bd=d;b=p}}
+  if(!b){for(let t=0;t<60&&!b;t++){const a=R()*6.283,r=8+R()*8,x=s.x+Math.cos(a)*r,y=s.y+Math.sin(a)*r;if(!inMain(x,y)||!farFromSettl(x,y,4))continue;
+    b={id:nid(),kind:'bandit',fac:-1,x,y,soldiers:[],path:[],target:null,immune:0,face:1,name:'Bandidos'};const n=s.type==='castle'?ri(6,10):ri(4,7);for(let i=0;i<n;i++)b.soldiers.push(makeSoldier(R()<.3?2:1,.85));G.parties.push(b)}}
+  if(b)s.offers.push({type:'bandits',target:b.id,reward:40+b.soldiers.length*(s.type==='castle'?16:11),ren:s.type==='castle'?4:2});
+  if(s.type==='castle'){const want=[...GK].sort((a,c)=>(s.stock[a]||0)-(s.stock[c]||0)).slice(0,3),k=pick(want),qty=ri(5,10);
+    s.offers.push({type:'deliver',good:k,qty,reward:Math.round(qty*GOODS[k].p*1.7),ren:3})}
+  else{const k=pick(GK.filter(x=>x!==s.prod)),qty=ri(4,8);s.offers.push({type:'deliver',good:k,qty,reward:Math.round(qty*GOODS[k].p*1.6),ren:2})}
+  return s.offers}
+function questsDaily(){const pl=G.player;pl.quests=(pl.quests||[]).filter(q=>{
+  if(q.type==='bandits'&&!party(q.target)){log(`Otros acabaron con los bandidos que te encargaron en ${settl(q.giver)?.name}. Tarea perdida.`,true);return false}
+  if(G.day>q.dl){log(`Se venció el plazo de tu tarea: ${questText(q)}.`,true);const s=settl(q.giver);if(s&&s.owner>0)addRel(0,s.owner,-3);return false}return true})}
+function completeQuest(q){const pl=G.player;pl.quests=pl.quests.filter(x=>x!==q);pl.gold+=q.reward;pl.renown+=q.ren;const s=settl(q.giver);if(s&&s.owner>0)addRel(0,s.owner,6);
+  log(`Tarea cumplida en ${s?s.name:'—'}: +${q.reward} oro, +${q.ren} renombre.`,true)}
+
+// ================= Encuentros =================
+function power(list){let s=0;for(const x of list){if(x.hp<=0||x.wounded)continue;s+=(x.atk+x.def*1.2)*(Math.max(1,x.hp)+x.def*5)}return s}
+function winChance(me,foe){const a=Math.pow(power(me.soldiers)*(.8+baseMorale(me)/250),2.4),b=Math.pow(power(foe.soldiers)*(.8+baseMorale(foe)/250),2.4);return a/(a+b||1)}
+function avgEq(list){if(!list.length)return 0;return Math.round(list.reduce((a,s)=>a+(s.eq||0),0)/list.length)}
+function openEncounter(o,s,mode){if(G.enc)return;const p=PP();const mine=!!(p.target&&((p.target.type==='party'&&p.target.id===o.id)||(s&&p.target.type==='settlement')));
+  G.enc={id:o.id,siege:s?s.id:null,mode:mode||null,mine};p.path=[];encModal()}
+function encModal(){const e=G.enc,o=party(e.id),p=PP();if(!o){G.enc=null;closeModal();return}
+  const s=e.siege?settl(e.siege):null,ch=Math.round(winChance(p,o)*100),col=ch>=65?'var(--ok)':ch>=40?'var(--gold)':'var(--blood)';
+  let t,d;
+  if(s){t=e.mode==='raid'?`Saqueo de ${s.name}`:`Asalto a ${s.name}`;d=e.mode==='raid'?`La milicia de la aldea (${o.soldiers.length} hombres) defiende sus graneros.`:`La guarnición de ${s.name} (${o.soldiers.length} hombres) os espera ${s.type==='castle'?'tras las murallas. Tus hombres llevan escalas de madera.':'entre las casas.'}`}
+  else if(o.kind==='bandit'){t=partyName(o);d=e.mine?`Alcanzas a ${o.soldiers.length} bandidos.`:`Una banda de ${o.soldiers.length} bandidos te sale al paso. Quieren tu oro.`}
+  else{t=partyName(o);d=e.mine?`Alcanzas a ${partyName(o).toLowerCase()}: ${o.soldiers.length} hombres.`:`${partyName(o)} (${o.soldiers.length} hombres) se lanza contra ti.`}
+  const flee=s||e.mine?'Dejarlo estar':'Intentar huir';
+  openModal(`<h2>${esc(t)}</h2><p>${esc(d)}</p>
+  <table style="max-width:520px"><tr><th></th><th>Aptos</th><th>Equipo medio</th><th>Moral</th></tr>
+  <tr><td>Tu compañía</td><td>${fit(p).length}${p.soldiers.length>fit(p).length?' (+'+(p.soldiers.length-fit(p).length)+' heridos)':''}</td><td>${EQ[avgEq(fit(p))].n}</td><td>${Math.round(baseMorale(p))}</td></tr><tr><td>Enemigos</td><td>${fit(o).length}</td><td>${EQ[avgEq(fit(o))].n}</td><td>${baseMorale(o)}</td></tr></table>
+  <p>Probabilidad estimada de victoria: <b style="color:${col}">${ch}%</b></p>
+  <div class="mlist"><button data-a="enc" data-v="fight">Luchar y dirigir la batalla</button><button data-a="enc" data-v="auto">Resolver al instante</button><button data-a="enc" data-v="flee" class="warn">${flee}</button></div>`)}
+function autoResolve(B){let i=0;while(battles.includes(B)&&i++<5000)updateBattle(B,.08)}
+function encAct(v){const e=G.enc,o=party(e.id),p=PP();G.enc=null;closeModal();if(!o)return;const s=e.siege?settl(e.siege):null;
+  if(v==='flee'){if(s||e.mine){p.target=null;p.immune=3;return}
+    const ch=clamp(.85-p.soldiers.length/(o.soldiers.length*2+2),.15,.85);
+    if(R()<ch){p.immune=6;toast('Lograste escapar.');let lost=0;for(const k of GK){const n=Math.floor((G.player.inv[k]||0)*.2);G.player.inv[k]-=n;lost+=n}if(lost)log(`Al huir abandonaste ${lost} cargas de mercancía.`);return}
+    toast('No lograste escapar.');v='fight'}
+  if(s&&s.type==='castle'&&e.mode!=='raid'){G.player.inv.madera=Math.max(0,(G.player.inv.madera||0)-CASTLE_WOOD)}
+  const B=startBattle(p,o,s?s.id:null);if(B&&e.mode==='raid')B.raid=true;if(B&&v==='auto')autoResolve(B)}
+
+// ================= Dentro de pueblos y castillos =================
+let townView='main';
+function enterSettlement(s){const p=PP();p.inside=s.id;p.path=[];p.target=null;p.moving=false;popClose();townView='main';townModal();
+  // repasa tareas de entrega
+}
+function leaveSettlement(){const p=PP(),s=settl(p.inside);p.inside=null;closeModal();if(s){const sp=nearestPass(s.x,s.y+1.4)||[s.x|0,s.y|0];p.x=sp[0]+.5;p.y=sp[1]+.5}}
+function sceneHTML(){return'<canvas id="scene" width="320" height="96" aria-hidden="true"></canvas>'}
+function drawScene(s){const c=document.getElementById('scene');if(!c||!c.getContext)return;const x=c.getContext('2d');if(!x)return;x.imageSmoothingEnabled=false;
+  const season=Math.floor(G.day/15)%4,sky=[['#8fb8d8','#bcd6e6'],['#79acd6','#cfe3ee'],['#c9a77d','#e3cba4'],['#9aa6b4','#d4dbe2']][season];
+  const lerp=(a,b,t)=>{const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16);return'#'+[16,8,0].map(k=>Math.round(((A>>k)&255)*(1-t)+((B>>k)&255)*t).toString(16).padStart(2,'0')).join('')};
+  for(let i=0;i<8;i++){x.fillStyle=lerp(sky[0],sky[1],i/7);x.fillRect(0,i*6.5|0,320,7)}x.fillStyle='#ffffff';x.globalAlpha=.7;for(const[cx,cy]of[[40,10],[210,16],[280,6]]){x.fillRect(cx,cy,26,4);x.fillRect(cx+5,cy-3,14,3)}x.globalAlpha=1;
+  x.fillStyle='#6d8f5a';for(let i=0;i<320;i+=4){const h=6+Math.round(4*Math.sin(i/23)+3*Math.sin(i/9));x.fillRect(i,52-h,4,h+2)}
+  x.fillStyle=season===3?'#dfe4e6':season===2?'#8a8a3e':'#5c8c3b';x.fillRect(0,52,320,44);x.fillStyle='#4a7a30';for(let i=0;i<60;i++)x.fillRect((i*53)%320,56+(i*29)%38,2,1);
+  const o=s.type==='castle'?castleSpr(s.id):villageSpr(s.id),w=o.cv.width*2,h=o.cv.height*2;x.drawImage(o.cv,160-w/2,88-h,w,h);const fc=facColor(s.owner);for(const fl of(o.flags||[[o.flag[0],o.flag[1]+8]])){const fx=160-w/2+fl[0]*2,fy=88-h+fl[1]*2;x.fillStyle='#3a2614';x.fillRect(fx,fy-16,2,18);x.fillStyle=fc;x.fillRect(fx+2,fy-16,12,6);x.fillStyle=shade(fc,-.3);x.fillRect(fx+2,fy-12,12,2)}
+  const col=facColor(s.owner);for(let i=0;i<5;i++){const sp=footman(col,0,i%2===0,s.type==='castle'?2:i%3);x.drawImage(sp,20+i*16+(i>2?190:0),62+(i%2)*4,sp.width*2,sp.height*2)}}
+function townModal(){const p=PP(),s=settl(p.inside);if(!s){leaveSettlement();return}const pl=G.player,isC=s.type==='castle',own=s.owner,k=own>0?G.kingdoms[own]:null;
+  const back='<div class="mlist" style="margin-top:10px"><button data-a="tv" data-v="main">Volver</button></div>';let h='';
+  const head=`<h2>${esc(s.name)}</h2>`;
+  if(townView==='main'){
+    const desc=isC?`Castillo de ${esc(facName(own))}${k?', bajo '+esc(rulerTitle(k)):''}. Guarnición de ${party(s.gar).soldiers.length} hombres.${own===0?' Es tuyo: te deja 7 de oro al día. Cuídalo, porque tus enemigos irán a por él.':''}`:`Aldea de ${esc(facName(own))}. Vive de ${PROD[s.prod]}.${s.raided>0?' Fue saqueada hace poco y aún se recupera.':''}`;
+    h=sceneHTML()+head+`<p>${desc}</p><div class="mlist">
+      <button data-a="tv" data-v="market">Ir al mercado</button>
+      <button data-a="tv" data-v="recruit">Reclutar voluntarios (${s.raided>0?0:s.recruits} disponibles)</button>
+      ${isC?`<button data-a="tv" data-v="armory">Herrería: equipar a tu tropa</button><button data-a="tv" data-v="tavern">Taberna: contratar mercenarios</button><button data-a="tv" data-v="slaver">Tratante de esclavos${pl.pris&&pl.pris.n?' ('+pl.pris.n+' prisioneros)':''}</button>`:''}
+      <button data-a="tv" data-v="quests">${isC?'Salón del señor: tareas':'Hablar con el alcalde: tareas'}</button>
+      ${!isC&&s.raided<=0?`<button data-a="work">Trabajar en ${PROD[s.prod]} (2 días)</button>`:''}
+      ${own===0?`<button data-a="tv" data-v="garrison">Guarnición (${party(s.gar).soldiers.length})</button>`:''}
+      <button data-a="rest">Descansar 3 días</button>
+      <button data-a="leave" class="warn">Salir</button></div>`}
+  else if(townView==='market'){const rows=GK.map(g=>{const have=pl.inv[g]||0,st=s.stock[g]||0;if(!have&&!st)return'';const bp=buyP(s,g),sp=sellP(s,g);
+      return`<tr><td>${GOODS[g].n}${!isC&&g===s.prod?' ★':''}</td><td>${st}</td><td>${have}</td><td>${bp}</td><td>${sp}</td><td class="tb"><button data-a="buy" data-v="${g}|1" ${st<1||pl.gold<bp||invLoad()>=capacity()?'disabled':''}>+1</button><button data-a="buy" data-v="${g}|5" ${st<5||pl.gold<bp*5||invLoad()+5>capacity()?'disabled':''}>+5</button><button data-a="sell" data-v="${g}|1" ${have<1?'disabled':''}>−1</button><button data-a="sell" data-v="${g}|${have}" ${have<1?'disabled':''}>Todo</button></td></tr>`}).join('');
+    h=head+`<p style="font-size:14px">Oro: <b>${pl.gold}</b> · Carga: ${invLoad()}/${capacity()} · Comida para ${Math.floor(rations()/eatNeed())} días. ${isC?'En los castillos se paga bien lo que escasea.':'Lo que produce la aldea (★) aquí sale barato.'}</p>
+      <div style="overflow-x:auto"><table><tr><th>Mercancía</th><th>En venta</th><th>Tuyo</th><th>Comprar</th><th>Vender</th><th></th></tr>${rows}</table></div>
+      <p style="font-size:13px;color:var(--dim)">El grano y el pescado dan 2 raciones; el ganado, 6. Cada hombre come 1 ración al día. La madera sirve para escalas de asedio y el hierro abarata la herrería.</p>`+back}
+  else if(townView==='recruit'){const cost=pl.traits.includes('Carismático')?18:25,n=s.raided>0?0:s.recruits,room=partyLimit()-menOf();
+    h=head+`<p>Hay ${n} voluntarios dispuestos a seguirte. Vienen con lo puesto: harapos y una lanza vieja. Cada uno cuesta ${cost} de oro.</p><p style="font-size:14px">Tu compañía: ${menOf()}/${partyLimit()} hombres (rango ${TIERS[tierOf()].n}).</p>
+      <div class="mlist"><button data-a="recruit" data-v="1" ${n<1||pl.gold<cost||room<1?'disabled':''}>Reclutar uno (${cost} oro)</button><button data-a="recruit" data-v="${n}" ${n<1||pl.gold<cost*n||room<n?'disabled':''}>Reclutar a todos (${cost*n} oro)</button></div>${room<1?'<p class="war">Has llegado al máximo de hombres de tu rango. Gana renombre para mandar más.</p>':''}`+back}
+  else if(townView==='armory'){const cnt=[0,0,0,0];for(const x of p.soldiers)cnt[x.eq||0]++;const iron=pl.inv.hierro||0;
+    let rows='';for(let t=1;t<4;t++){const need=p.soldiers.filter(x=>(x.eq||0)<t);const cost=need.reduce((a,x)=>a+EQ[t].c-EQ[x.eq||0].c,0),ci=Math.round(cost*.75);
+      rows+=`<tr><td><b>${EQ[t].n}</b><br><small style="color:var(--dim)">+${EQ[t].atk} ataque, +${EQ[t].def} defensa, +${EQ[t].hp} vida</small></td><td>${EQ[t].c} c/u</td><td class="tb"><button data-a="equip" data-v="${t}|0" ${!need.length||pl.gold<cost?'disabled':''}>Equipar a ${need.length} (${cost} oro)</button>${need.length?`<button data-a="equip" data-v="${t}|1" ${iron<need.length||pl.gold<ci?'disabled':''}>Con tu hierro: ${ci} oro + ${need.length} hierro</button>`:''}</td></tr>`}
+    h=head+`<p>El herrero mira a tus hombres de arriba abajo. Ahora mismo llevas: ${cnt.map((c,i)=>c?c+' con '+EQ[i].n.toLowerCase():'').filter(Boolean).join(', ')}.</p><div style="overflow-x:auto"><table><tr><th>Equipo</th><th>Precio</th><th></th></tr>${rows}</table></div><p style="font-size:13px;color:var(--dim)">Un hombre bien armado vale por dos. Tu hierro te ahorra un cuarto del precio.</p>`+back}
+  else if(townView==='tavern'){if(!s.mercs||G.day-(s.mercDay||-99)>8){s.mercDay=G.day;s.mercs=[];for(let i=0;i<ri(2,5);i++){const m=makeSoldier(ri(2,4),1,ri(1,2));m.line=R()<.5?'g':'h';m.cost=50+m.lvl*18+m.eq*30;s.mercs.push(m)}}
+    const room=partyLimit()-menOf();
+    h=head+`<p>Entre jarras de vino, unos mercenarios curtidos ofrecen su espada. Son caros, pero llegan armados y con experiencia.</p><div style="overflow-x:auto"><table><tr><th>Nombre</th><th>Nivel</th><th>Equipo</th><th>Rasgos</th><th></th></tr>${s.mercs.map((m,i)=>`<tr><td>${esc(m.name)}</td><td>${m.lvl}</td><td>${EQ[m.eq].n}</td><td>${trs(m.traits,STRAITS)}</td><td><button data-a="hire" data-v="${i}" ${pl.gold<m.cost||room<1?'disabled':''}>Contratar (${m.cost})</button></td></tr>`).join('')||'<tr><td colspan="5">No queda nadie. Vuelve en unos días.</td></tr>'}</table></div>
+      <p style="font-size:14px;color:var(--dim)">Se oye en la taberna: ${esc(G.log.find(e=>/guerra|cayó|Murió/.test(e.t))?.t||'que los caminos están tranquilos.')}</p>`+back}
+  else if(townView==='slaver'){const pr=pl.pris||{n:0,v:0};h=head+`<p>El tratante cuenta cabezas con desdén. ${pr.n?`Por tus ${pr.n} prisioneros ofrece ${pr.v} de oro.`:'No traes prisioneros. Los consigues venciendo en batalla.'}</p><div class="mlist"><button data-a="sellpris" ${pr.n?'':'disabled'}>Vender a todos (${pr.v} oro)</button></div>`+back}
+  else if(townView==='garrison'){const g=party(s.gar);h=head+`<p>La guarnición de ${esc(s.name)} tiene ${g.soldiers.length} hombres. Una tierra sin defensores cae en manos del primero que llegue.</p><div class="mlist"><button data-a="gleave" ${menOf()<1?'disabled':''}>Dejar un hombre</button><button data-a="gtake" ${!g.soldiers.length||menOf()>=partyLimit()?'disabled':''}>Tomar un hombre</button></div>`+back}
+  else if(townView==='quests'){const offers=makeOffers(s),mine=(pl.quests||[]).filter(q=>q.giver===s.id);
+    let lst=mine.map(q=>{const ok=q.type==='deliver'&&(pl.inv[q.good]||0)>=q.qty;return`<div class="kg"><b>${esc(questText(q))}</b><div class="d">Recompensa ${q.reward} oro · vence el ${fmtDate(q.dl)}</div>${q.type==='deliver'?`<button data-a="deliver" data-v="${pl.quests.indexOf(q)}" ${ok?'':'disabled'}>Entregar ${q.qty} de ${GOODS[q.good].n}</button>`:''}</div>`}).join('');
+    const av=offers.map((o,i)=>{const taken=(pl.quests||[]).some(q=>q.giver===s.id&&q.type===o.type);return taken?'':`<div class="kg"><b>${esc(questText({...o,giver:s.id}))}</b><div class="d">Recompensa ${o.reward} oro y ${o.ren} de renombre · 30 días de plazo</div><button data-a="accept" data-v="${i}" ${(pl.quests||[]).length>=3?'disabled':''}>Aceptar</button></div>`}).join('');
+    h=head+`<p>${isC?(k?esc(rulerTitle(k))+' te recibe en su salón.':'El castellano te recibe.'):'El alcalde se quita el sombrero al verte.'}</p>${lst?'<h3>Tus tareas aquí</h3>'+lst:''}<h3>Trabajo disponible</h3>${av||'<p>Nada más por ahora.</p>'}
+      ${isC&&own>0&&pl.liege==null?`<div class="mlist"><button data-a="swear" data-v="${own}" ${canSwear(G.kingdoms[own])?'':'disabled'}>Jurar lealtad a ${esc(G.kingdoms[own].name)}${pl.renown<8?' (necesitas 8 de renombre)':''}</button></div>`:''}`+back}
+  openModal(h);if(townView==='main')drawScene(s)}
+function raidVillage(s){const pl=G.player;let got=[];for(const k of GK){const n=Math.min(s.stock[k]||0,Math.max(0,capacity()-invLoad()));if(n>0){pl.inv[k]=(pl.inv[k]||0)+n;s.stock[k]-=n;got.push(n+' de '+GOODS[k].n.toLowerCase())}}
+  const gold=ri(40,90);pl.gold+=gold;pl.mev=(pl.mev||0)+4;s.raided=30;s.recruits=0;if(s.owner>0)addRel(0,s.owner,-15);pl.renown+=2;
+  log(`Saqueaste ${s.name}: +${gold} oro${got.length?', '+got.join(', '):''}. La aldea tardará en recuperarse.`,true)}
+function sackModal(s){G.sack=s.id;openModal(`<h2>${esc(s.name)} es tuyo</h2><p>Tus hombres derriban las últimas puertas. El castillo está en tus manos. ¿Qué haces con él?</p>
+  <div class="mlist"><button data-a="occupy">Ocuparlo: será tu tierra y te dará rentas, pero tendrás que defenderlo</button><button data-a="sack" class="warn">Saquearlo y marcharte: botín grande, y su antiguo señor no lo olvidará</button></div>`)}
+function grantCastle(){const p=PP(),pl=G.player;if(G.settlements.some(s=>s.owner===0&&s.type==='castle'))return;
+  const cs=G.settlements.filter(s=>s.type==='castle'&&s.owner>0).sort((a,b)=>dist(a.x,a.y,p.x,p.y)-dist(b.x,b.y,p.x,p.y));
+  const s=cs.find(c=>G.kingdoms[c.owner].capital!==c.id)||cs[0];if(!s)return;const k=G.kingdoms[s.owner];
+  s.owner=0;s.prevOwner=k.id;const g=party(s.gar);g.fac=0;g.soldiers=g.soldiers.filter(x=>!x.wounded).slice(0,8);while(g.soldiers.length<8)g.soldiers.push(makeSoldier(ri(1,2),1,1));
+  if(k.capital===s.id){const rest=G.settlements.filter(x=>x.owner===k.id);if(rest.length)k.capital=(rest.find(x=>x.type==='castle')||rest[0]).id}
+  rebuildTerritory();miniDirty=true;log(`${rulerTitle(k)} te concede el castillo de ${s.name} como feudo (modo de prueba).`,true);
+  closeModal();cam.x=s.x;cam.y=s.y;cam.follow=false;pop={type:'settlement',id:s.id}}
+function questsModal(){const pl=G.player,q=pl.quests||[];openModal(`<h2>Tus tareas</h2>${q.length?q.map(x=>`<div class="kg"><b>${esc(questText(x))}</b><div class="d">Encargo de ${esc(settl(x.giver)?.name||'—')} · ${x.reward} oro · vence el ${fmtDate(x.dl)}</div></div>`).join(''):'<p>No tienes encargos. Habla con alcaldes y señores dentro de aldeas y castillos.</p>'}
+  <div class="mlist" style="margin-top:10px"><button data-a="close">Volver al mapa</button></div>`)}
+
+
+// ---- Caminos ----
+function buildRoads(){G.roads=[];const S=G.settlements,done=new Set();
+  for(const a of S){const near=S.filter(b=>b!==a).sort((b,c)=>dist(a.x,a.y,b.x,b.y)-dist(a.x,a.y,c.x,c.y)).slice(0,2);
+    for(const b of near){const k=key(a.id,b.id);if(done.has(k)||dist(a.x,a.y,b.x,b.y)>24)continue;done.add(k);addRoad(a,b)}}}
+function addRoad(a,b){const path=findPath(a.x,a.y,b.x,b.y);if(!path)return;const pts=[[a.x,a.y],...path].map(([x,y])=>[Math.round(x*100)/100,Math.round(y*100)/100]);G.roads.push(pts);for(const[x,y]of pts)road[(y|0)*W+(x|0)]=1;if(terrCv)drawRoad(pts)}
+function drawRoad(pts){const c=terrCv.getContext('2d');for(const pass of[0,1])for(let i=1;i<pts.length;i++){const[x0,y0]=pts[i-1],[x1,y1]=pts[i],n=Math.ceil(dist(x0,y0,x1,y1)*TS);
+  for(let j=0;j<=n;j++){const t=j/n,x=(x0+(x1-x0)*t)*TS,y=(y0+(y1-y0)*t)*TS;if(terr[((y/TS)|0)*W+((x/TS)|0)]===WATER)continue;
+    if(pass===0){c.fillStyle='#7d6544';c.fillRect(Math.round(x)-1,Math.round(y)-1,3,3)}else{c.fillStyle=((j*7+i)%11===0)?'#9a8a6c':'#ab8f62';c.fillRect(Math.round(x),Math.round(y),1,1)}}}}
+function setTimeoutSafe(f){if(typeof setTimeout==='function')setTimeout(f,0);else f()}
+// ================= Render =================
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let dpr=1,cssW=800,cssH=600,now=0;const cam={x:75,y:50,zoom:2,follow:true};
+function resize(){dpr=Math.min(2,window.devicePixelRatio||1);cssW=cv.clientWidth||innerWidth;cssH=cv.clientHeight||innerHeight;cv.width=Math.round(cssW*dpr);cv.height=Math.round(cssH*dpr)}
+function fr(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x,y,w,h)}
+
+// ---- Sprites con contorno automático ----
+const SKIN='#e2b48c',SKIN_D='#b98a63',PANTS='#4a3a2c',BOOT='#2b1f17',WOOD='#7a5532',STEEL='#b3b8bf',STEEL_D='#7d838b',TIP='#e6eaef';
+function outlineCv(cv){const c=cv.getContext('2d'),w=cv.width,h=cv.height,id=c.getImageData(0,0,w,h),d=id.data,s=new Uint8ClampedArray(d);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=(y*w+x)*4;if(s[i+3]>100)continue;
+    if((x>0&&s[i-1]>100)||(x<w-1&&s[i+7]>100)||(y>0&&s[i-w*4+3]>100)||(y<h-1&&s[i+w*4+3]>100)){d[i]=24;d[i+1]=17;d[i+2]=11;d[i+3]=255}}
+  c.putImageData(id,0,0);return cv}
+function mkCv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
+function mkSprite(w,h,fn,flip,noOutline){const cvs=mkCv(w+2,h+2),c=cvs.getContext('2d');
+  const f=(x,y,ww,hh,col)=>{c.fillStyle=col;c.fillRect(1+(flip?w-x-ww:x),1+y,ww,hh)};fn(f);return noOutline?cvs:outlineCv(cvs)}
+const SPR=new Map();
+function spr(key,w,h,fn,flip){const k=key+(flip?'|L':'|R');let s=SPR.get(k);if(!s){s=mkSprite(w,h,fn,flip);SPR.set(k,s)}return s}
+// soldado de a pie: escudo con el color de su bando, casco y lanza
+function footman(col,fr_,flip,eq=2){const dk=shade(col,-.35),lt=shade(col,.25);return spr(`F${col}${fr_}e${eq}`,10,12,f=>{
+  const leg=eq>=3?STEEL_D:PANTS;
+  if(fr_===1){f(2,9,1,2,leg);f(5,9,1,2,leg);f(1,11,2,1,BOOT);f(5,11,2,1,BOOT)}else{f(3,9,1,2,leg);f(5,9,1,2,leg);f(3,11,2,1,BOOT);f(5,11,2,1,BOOT)}
+  f(2,5,5,4,col);f(2,5,5,1,lt);f(2,8,5,1,dk);
+  if(eq===1){f(2,7,5,1,'#8a6a42');f(4,5,1,3,shade(col,-.15))}
+  if(eq===2){f(2,5,1,4,STEEL_D);f(6,5,1,3,STEEL_D);f(3,5,3,1,STEEL);f(4,6,1,2,dk)}
+  if(eq>=3){f(2,5,5,3,STEEL);f(2,5,5,1,'#e3e6ea');f(4,5,1,4,col);f(2,8,5,1,dk);f(6,6,1,2,STEEL_D)}
+  f(3,2,3,3,SKIN);f(5,3,1,1,'#3a2414');f(3,4,3,1,SKIN_D);
+  if(eq===0){f(3,1,3,1,'#5a3a22');f(2,2,1,2,'#5a3a22')}
+  else if(eq===1){f(3,1,3,2,'#7a5532');f(3,1,1,1,'#9a7550')}
+  else{f(3,1,3,2,STEEL);f(3,1,1,1,'#e3e6ea');f(2,3,1,1,STEEL_D);if(eq>=3){f(4,0,1,1,col);f(3,0,1,1,col)}}
+  if(eq>0){f(0,5,2,4,dk);f(0,5,2,1,col);f(0,6,1,1,eq>=2?'#e2c45a':'#8a6a42')}
+  const tip=eq===0?'#a07a4a':TIP;
+  if(fr_===2){f(6,6,1,1,SKIN);f(6,6,4,1,WOOD);f(9,5,1,3,tip)}else{f(6,6,1,2,SKIN);f(7,0,1,10,WOOD);f(7,0,1,2,tip)}
+},flip)}
+// bandido: capucha, capa raída y garrote
+function banditSpr(fr_,flip){return spr(`B${fr_}`,10,12,f=>{
+  if(fr_===1){f(2,9,1,2,'#3b3026');f(5,9,1,2,'#3b3026');f(1,11,2,1,BOOT);f(5,11,2,1,BOOT)}else{f(3,9,1,2,'#3b3026');f(5,9,1,2,'#3b3026');f(3,11,2,1,BOOT);f(5,11,2,1,BOOT)}
+  f(1,5,6,4,'#6b4a2e');f(1,8,6,1,'#4a3220');f(2,6,1,1,'#4a3220');f(5,7,1,1,'#4a3220');
+  f(2,1,4,4,'#5a3d25');f(2,1,4,1,'#6b4a2e');f(4,2,2,2,SKIN_D);f(5,2,1,1,'#1d120a');
+  if(fr_===2){f(6,6,4,1,WOOD);f(8,5,2,3,'#5a3e22')}else{f(7,3,1,6,WOOD);f(7,1,2,3,'#5a3e22')}
+},flip)}
+// jinete: para tu señor (caballo blanco, oro) y los capitanes de los reinos
+function riderSpr(col,horse,helm,fr_,flip){const dk=shade(col,-.35),hd=shade(horse,-.3),hl=shade(horse,.2);return spr(`R${col}${horse}${fr_}`,15,14,f=>{
+  f(0,6,1,4,hd);f(1,5,1,2,hd);
+  f(2,6,9,4,horse);f(2,6,9,1,hl);f(2,9,9,1,hd);
+  f(10,3,2,5,horse);f(11,2,3,3,horse);f(13,4,1,1,hd);f(11,1,1,1,horse);f(9,3,1,4,hd);f(12,3,1,1,'#1d120a');
+  const L=fr_===1?[[3,10,3],[5,11,2],[8,11,2],[10,10,3]]:[[3,10,3],[5,10,3],[8,10,3],[10,10,3]];
+  for(const[x,y,h]of L){f(x,y,1,h,hd);f(x,y+h,1,1,BOOT)}
+  f(4,5,5,2,dk);f(4,5,5,1,'#e2c45a');
+  f(5,2,3,4,col);f(5,2,3,1,shade(col,.25));f(4,2,1,5,dk);f(6,6,1,2,PANTS);f(6,8,1,1,BOOT);
+  f(5,-1+1,3,3,SKIN);f(7,1,1,1,'#3a2414');f(5,0,3,1,helm);f(5,0,1,1,shade(helm,.4));
+  f(8,3,1,1,SKIN);
+},flip)}
+function corpseSpr(col){return spr(`C${col}`,10,4,f=>{f(1,1,6,2,col);f(1,2,6,1,shade(col,-.35));f(7,1,2,2,SKIN);f(0,1,1,2,BOOT);f(3,3,3,1,'#7a1f1f')},false)}
+
+// ---- Castillos: cada uno distinto ----
+const CASTLE=new Map(),VILL=new Map();
+function castleSpr(id){let o=CASTLE.get(id);if(o)return o;
+  const r=mulberry32(id*9973+71),rr=(a,b)=>a+Math.floor(r()*(b-a+1));
+  const STONES=[['#c2bcb1','#a19b91','#7b766e'],['#d2bb92','#b39c73','#8a7552'],['#9a9ca2','#7c7e84','#5c5e63'],['#dcd6cb','#bdb7ac','#948f86'],['#b49f8a','#957f6a','#6e5b49']];
+  const[L,M,D]=STONES[rr(0,4)],ROOFS=['#9a3f30','#3f5d80','#55535c','#7a4f2c','#2f6b52','#7d3552'],roof=ROOFS[rr(0,5)],cone=r()<.6,rdk=shade(roof,-.35),rlt=shade(roof,.2);
+  const Wd=46,Hd=50,flags=[];
+  const cvs=mkSprite(Wd,Hd,f=>{
+    const win=(x,y)=>{f(x,y,1,2,'#24180f')};
+    const mortar=(x,y,w,h)=>{for(let j=y+2;j<y+h-1;j+=3)for(let i=x+1+(j%2);i<x+w-1;i+=rr(3,5))f(i,j,rr(1,2),1,D)};
+    const tower=(x,y,w,h,flag)=>{f(x,y,w,h,M);f(x,y,1,h,L);f(x+w-1,y,1,h,D);mortar(x,y,w,h);win(x+(w>>1),y+3);if(h>12)win(x+(w>>1),y+h-6);
+      const cx=x+w/2;
+      if(cone){const rh=Math.min(12,Math.round(w*1.1)+1);for(let i=0;i<rh;i++){const hw=Math.max(.5,(w/2+1)*(1-i/rh));const x0=Math.round(cx-hw),x1=Math.round(cx+hw);f(x0,y-1-i,x1-x0,1,roof);f(Math.round(cx),y-1-i,x1-Math.round(cx),1,rdk);f(x0,y-1-i,1,1,rlt)}
+        if(flag)flags.push([Math.round(cx),y-1-rh])}
+      else{f(x-1,y-2,w+2,2,M);f(x-1,y-2,w+2,1,L);for(let i=0;i<w+2;i+=2)f(x-1+i,y-3,1,1,M);if(flag)flags.push([Math.round(cx),y-3])}};
+    const wall=(x,y,w,h)=>{f(x,y,w,h,M);f(x,y,w,1,L);f(x,y+h-1,w,1,D);mortar(x,y,w,h);for(let i=0;i<w;i+=2)f(x+i,y-1,1,1,M)};
+    const ww=rr(24,34),wh=rr(8,10),wx=(Wd-ww)>>1,wy=Hd-wh-1,tw=rr(6,7),layout=rr(0,3);
+    // muro trasero y torres traseras
+    const by=wy-rr(7,10);wall(wx+3,by,ww-6,wh-3);
+    if(layout>=2){tower(wx+1,by-6,tw-1,wh+3,false);tower(wx+ww-tw,by-6,tw-1,wh+3,false)}
+    // torre del homenaje (una o dos)
+    const kw=rr(9,13),kh=rr(15,20),kx=((Wd-kw)>>1)+rr(-5,5),ky=wy-kh+rr(1,4);
+    if(r()<.3){const k2w=rr(6,8),k2x=kx<Wd/2?kx+kw-1:kx-k2w+1;tower(k2x,ky+5,k2w,kh-5,false)}
+    tower(kx,ky,kw,kh,true);
+    if(!cone&&r()<.5){f(kx+2,ky-6,kw-4,4,M);f(kx+2,ky-6,1,4,L);for(let i=0;i<kw-4;i+=2)f(kx+2+i,ky-7,1,1,M);flags.pop();flags.push([kx+(kw>>1),ky-7])}
+    // muro frontal, torres y puerta
+    wall(wx,wy,ww,wh);
+    tower(wx-3,wy-6,tw,wh+6,layout!==1);tower(wx+ww-tw+3,wy-6,tw,wh+6,layout!==1);
+    if(layout===1||layout===3){const gx=(Wd>>1)-4;tower(gx,wy-5,8,wh+5,true)}
+    const gx=Wd>>1;f(gx-3,wy+wh-6,6,6,'#24180f');f(gx-2,wy+wh-7,4,1,'#24180f');for(let i=-2;i<3;i+=2)f(gx+i,wy+wh-6,1,6,'#5b4a38');f(gx-3,wy+wh-4,6,1,'#5b4a38');
+    f(gx-4,wy+wh-7,1,7,L);f(gx+3,wy+wh-7,1,7,D);
+  });
+  o={cv:cvs,flags:flags.map(([x,y])=>[x+1,y+1])};CASTLE.set(id,o);return o}
+function villageSpr(id){let o=VILL.get(id);if(o)return o;
+  const r=mulberry32(id*7919+13),rr=(a,b)=>a+Math.floor(r()*(b-a+1));
+  const Wd=40,Hd=28,flags=[];
+  const fields=mkSprite(Wd,Hd,f=>{const n=rr(2,3);for(let k=0;k<n;k++){const fw=rr(8,12),fh=rr(5,7),fx=rr(0,Wd-fw),fy=rr(Hd-12,Hd-fh),cols=[['#bfa94a','#a48f3a'],['#8fae4c','#759339'],['#8a6a42','#6f5232']][rr(0,2)];
+    f(fx,fy,fw,fh,cols[0]);for(let j=fy+1;j<fy+fh;j+=2)f(fx,j,fw,1,cols[1])}},false,true);
+  const WALLS=['#d8c49b','#c9ad7f','#bfa17a','#d3c7b0'],ROOFS=['#c9a84b','#a5513a','#7a756d','#8a5a35'],smoke=[];
+  const roofAll=ROOFS[rr(0,3)];
+  const bld=mkSprite(Wd,Hd,f=>{
+    const house=(x,y,w,h,rc)=>{const wc=WALLS[rr(0,3)];f(x,y,w,h,wc);f(x,y,w,1,'#6b4a2e');f(x,y+h-1,w,1,shade(wc,-.25));if(r()<.6){f(x+(w>>1),y,1,h,'#6b4a2e')}
+      f(x+1,y+h-3,2,3,'#3a2414');f(x+w-3,y+1,2,1,'#2a1d14');
+      const rh=Math.ceil((w+2)/2);for(let i=0;i<rh;i++){const x0=x-1+i,ww2=w+2-2*i;if(ww2<=0)break;f(x0,y-1-i,ww2,1,rc);f(x0+(ww2>>1),y-1-i,Math.ceil(ww2/2),1,shade(rc,-.3))}
+      if(r()<.5){f(x+w-3,y-rh+1,1,2,'#5a5048');smoke.push([x+w-2,y-rh+1])}};
+    const special=r();
+    if(special<.3){// iglesia
+      const x=rr(16,24),y=14;f(x,y+4,9,7,'#d3cbbb');f(x,y+10,9,1,'#a9a191');f(x+1,y+6,1,2,'#24180f');f(x+6,y+6,1,2,'#24180f');
+      for(let i=0;i<5;i++)f(x-1+i,y+3-i,11-2*i,1,'#7a756d');f(x+3,y-7,3,7,'#d3cbbb');f(x+4,y-5,1,2,'#24180f');for(let i=0;i<3;i++)f(x+3+i,y-8-i,3-2*i>0?3-2*i:1,1,'#7a756d');
+      f(x+4,y-13,1,4,'#e2c45a');f(x+3,y-12,3,1,'#e2c45a');}
+    else if(special<.55){// molino
+      const x=rr(26,32),y=9;f(x,y,5,9,'#c9ad7f');f(x,y+8,5,1,'#8a7552');f(x+2,y+5,1,3,'#3a2414');for(let i=0;i<3;i++)f(x+i,y-1-i,5-2*i,1,'#8a5a35');
+      const bx=x+2,by2=y+1,a=Math.floor((id*13)%2);if(a){f(bx-6,by2,13,1,'#e8dcc0');f(bx,by2-6,1,13,'#e8dcc0')}else{for(let i=-5;i<=5;i++){f(bx+i,by2+i,1,1,'#e8dcc0');f(bx+i,by2-i,1,1,'#e8dcc0')}}
+      f(bx,by2,1,1,'#3a2414')}
+    const slots=[[2,12],[11,8],[4,20],[14,18],[24,20],[30,13]].sort(()=>r()-.5),n=rr(3,5);
+    for(let k=0;k<n;k++){const[x,y]=slots[k];house(x,y,rr(6,8),rr(4,5),r()<.7?roofAll:ROOFS[rr(0,3)])}
+    if(r()<.5){const x=rr(18,26),y=rr(22,24);f(x,y,4,2,'#8d877f');f(x+1,y,2,1,'#2b4e70')}
+  });
+  const cvs=mkCv(Wd+2,Hd+2),c=cvs.getContext('2d');c.drawImage(fields,0,0);c.drawImage(bld,0,0);
+  o={cv:cvs,flag:[rr(6,12),rr(4,7)],smoke};VILL.set(id,o);return o}
+function drawFlag(x,y,col,big){const h=big?8:6;fr(x,y-h,1,h+1,'#3a2614');const w=big?6:5,wv=Math.floor(now*3+x)%2;
+  fr(x+1,y-h,w,3,col);fr(x+1,y-h+2,w,1,shade(col,-.3));fr(x+w+1,y-h+wv,1,2,col);fr(x+1,y-h,w,1,shade(col,.25))}
+function shadow(x,y,w){fr(x-(w>>1),y,w,1,'rgba(0,0,0,.28)');fr(x-(w>>1)+1,y+1,w-2,1,'rgba(0,0,0,.18)')}
+function blit(s,x,y){ctx.drawImage(s,Math.round(x-s.width/2),Math.round(y-s.height+1))}
+function drawUnitSprite(kind,col,x,y,face,frame,lord,eq){
+  if(lord){shadow(x,y,13);blit(riderSpr(col,col===PCOLOR?'#eee8dc':'#7a4b2a',col===PCOLOR?'#e2c45a':STEEL,frame===2?0:frame,face<0),x,y)}
+  else{shadow(x,y,7);blit(kind==='bandit'?banditSpr(frame,face<0):footman(col,frame,face<0,eq==null?2:eq),x,y)}}
+function drawPartyMap(p){
+  const x=Math.round(p.x*TS),y=Math.round(p.y*TS),col=facColor(p.fac),n=p.soldiers.length,face=p.face||1;
+  const mv=p.moving?(Math.floor(now*8+p.id)%2):0,fol=Math.min(3,n-1),kind=p.kind;
+  if(p.immune>0&&kind==='player')ctx.globalAlpha=.55+.45*Math.sin(now*12);
+  for(let i=fol;i>=1;i--){const fx=x-face*(i*6),fy=y+(i%2?2:-2);drawUnitSprite(kind,col,fx,fy,face,(mv+i)%2,false,(p.soldiers[i]||{}).eq||0)}
+  const leaderRider=kind==='player'||kind==='army';
+  drawUnitSprite(kind,col,x,y,face,mv,leaderRider,(p.soldiers[0]||{}).eq||0);
+  if(kind!=='bandit')drawFlag(x-face*(leaderRider?6:4),y-(leaderRider?14:11),col,kind!=='patrol');
+  ctx.globalAlpha=1;
+  if(kind==='player'){const by=y-24+Math.round(Math.sin(now*4)*1.5);fr(x-1,by-3,3,1,OUTC);fr(x-2,by-2,5,1,OUTC);fr(x-1,by-2,3,1,PCOLOR);fr(x-2,by-1,5,1,OUTC);fr(x-1,by-1,3,1,PCOLOR);fr(x,by,1,2,PCOLOR);fr(x-1,by,1,1,OUTC);fr(x+1,by,1,1,OUTC);fr(x,by+2,1,1,OUTC)}
+}
+const OUTC='#18110b';
+function render(){
+  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#22456a';ctx.fillRect(0,0,cv.width,cv.height);
+  if(!G||!terrCv)return;ctx.imageSmoothingEnabled=false;
+  const ps=cam.zoom*dpr,ox=Math.round(cv.width/2-cam.x*TS*ps),oy=Math.round(cv.height/2-cam.y*TS*ps);
+  ctx.setTransform(ps,0,0,ps,ox,oy);ctx.drawImage(terrCv,0,0);ctx.drawImage(terCvOwn,0,0);
+  const vx0=-ox/ps/TS-3,vy0=-oy/ps/TS-2,vx1=vx0+cv.width/ps/TS+6,vy1=vy0+cv.height/ps/TS+7,vis=(x,y)=>x>vx0&&x<vx1&&y>vy0&&y<vy1;
+  {const tf=Math.floor(now*1.4);for(let ty=Math.max(0,vy0|0);ty<Math.min(H,vy1);ty++)for(let tx=Math.max(0,vx0|0);tx<Math.min(W,vx1);tx++){if(terr[ty*W+tx]!==WATER)continue;
+    const h=((tx*73856093)^(ty*19349663)^(tf*83492791))>>>0;if(h%53===0){const gx=tx*TS+(h>>7)%6,gy=ty*TS+(h>>11)%7;fr(gx,gy,2,1,'#8fb8d6');fr(gx+2,gy-1,1,1,'#cfe2ee')}}}
+  for(const s of G.settlements){if(s.type!=='village'||!vis(s.x,s.y))continue;const x0=Math.round(s.x*TS),y0=Math.round(s.y*TS);
+    if(s.raided>0){for(let i=0;i<4;i++){const ph=(now*.5+i*.25+s.id*.13)%1;fr(x0-8+i*5+Math.round(Math.sin(now+i)*2),y0-4-Math.round(ph*14),2,2,`rgba(40,36,32,${.7*(1-ph)})`)}}
+    if(s.prod==='ganado'||s.prod==='lana'){for(let i=0;i<4;i++){const ax=x0-16+((s.id*37+i*11)%30)+Math.round(Math.sin(now*.3+i*2)*2),ay=y0+9+((s.id*13+i*7)%5);
+      if(s.prod==='ganado'){fr(ax-1,ay-3,5,3,OUTC);fr(ax,ay-2,3,1,'#e8e4da');fr(ax+1,ay-2,1,1,'#3a2a1c');fr(ax+3,ay-3,1,2,'#8a5a35');fr(ax,ay,1,1,OUTC);fr(ax+2,ay,1,1,OUTC)}
+      else{fr(ax-1,ay-3,4,3,OUTC);fr(ax,ay-2,2,1,'#f4f0e6');fr(ax+2,ay-2,1,1,'#3a2a1c')}}}
+    if(s.boat&&vis(s.boat[0],s.boat[1])){const bx=Math.round(s.boat[0]*TS),by=Math.round(s.boat[1]*TS+Math.sin(now*2+s.id));fr(bx-3,by,7,2,'#6b4a2e');fr(bx-2,by+2,5,1,'#4a3220');fr(bx,by-5,1,5,'#3a2614');fr(bx+1,by-5,3,4,'#efe6d0')}}
+  for(const c of corpses){if(!vis(c.x,c.y))continue;ctx.globalAlpha=Math.max(0,1-c.t/30);blit(corpseSpr(c.c),c.x*TS,c.y*TS+2)}
+  ctx.globalAlpha=1;
+  const pp=PP();
+  if(pp.path&&pp.path.length&&!pp.inBattle){const[tx,ty]=pp.path[pp.path.length-1];const x=Math.round(tx*TS),y=Math.round(ty*TS),k=Math.floor(now*4)%2;
+    fr(x-3+k,y-3+k,2,1,PCOLOR);fr(x+2-k,y-3+k,2,1,PCOLOR);fr(x-3+k,y+2-k,2,1,PCOLOR);fr(x+2-k,y+2-k,2,1,PCOLOR);fr(x,y,1,1,PCOLOR)}
+  const items=[];
+  for(const s of G.settlements)if(vis(s.x,s.y))items.push({y:s.y+.3,f:()=>{const x=Math.round(s.x*TS),y=Math.round(s.y*TS)+4,col=facColor(s.owner);
+    if(s.type==='castle'){const o=castleSpr(s.id);fr(x-18,y,36,2,'rgba(0,0,0,.22)');blit(o.cv,x,y);const x0=Math.round(x-o.cv.width/2),y0=Math.round(y-o.cv.height+1);for(const fl of o.flags)drawFlag(x0+fl[0],y0+fl[1],col,true)}
+    else{const o=villageSpr(s.id);blit(o.cv,x,y);const x0=Math.round(x-o.cv.width/2),y0=Math.round(y-o.cv.height+1);drawFlag(x0+o.flag[0],y0+o.flag[1]+8,col,false);
+      if(s.raided<=0)for(const[cx,cy]of o.smoke){for(let i=0;i<3;i++){const ph=(now*.45+i/3+cx*.07)%1;ctx.globalAlpha=.55*(1-ph);fr(x0+cx+Math.round(Math.sin(ph*5+cx)*1.5),y0+cy-2-Math.round(ph*9),ph>.5?2:1,ph>.5?2:1,'#d6d1c6')}ctx.globalAlpha=1}}}});
+  for(const p of G.parties){if(p.kind==='garrison'||p.inBattle||p.inside||!vis(p.x,p.y))continue;items.push({y:p.y,f:()=>drawPartyMap(p)})}
+  for(const B of battles){const pa=party(B.a),pb=party(B.b);for(const u of B.units){if(u.s.hp<=0||!vis(u.x,u.y))continue;items.push({y:u.y,f:()=>{
+    const p=u.side?pb:pa,frame=u.hit>0?2:u.mv?(Math.floor(now*8+u.s.id)%2):0;
+    drawUnitSprite(p?p.kind:'army',p?facColor(p.fac):'#777',Math.round(u.x*TS),Math.round(u.y*TS),u.face,frame,!!u.s.lord,u.s.eq||0)}})}}
+  items.sort((a,b)=>a.y-b.y);for(const it of items)it.f();
+  for(const q of G.player.quests||[]){if(q.type!=='bandits')continue;const b=party(q.target);if(!b||b.inBattle||!vis(b.x,b.y))continue;const x=Math.round(b.x*TS),y=Math.round(b.y*TS)-26+Math.round(Math.sin(now*5));fr(x-2,y-1,5,9,OUTC);fr(x-1,y,3,5,'#e0503a');fr(x-1,y+6,3,2,'#e0503a')}
+  for(const f of fx){const x=Math.round(f.x*TS),y=Math.round(f.y*TS);fr(x,y,1,1,'#f4f1e8');fr(x-1,y+1,1,1,'#c0392b');fr(x+1,y-1,1,1,'#c0392b')}
+  // etiquetas
+  ctx.setTransform(1,0,0,1,0,0);const sc=TS*ps;ctx.textAlign='center';ctx.lineJoin='round';
+  if(cam.zoom>=2){ctx.font=`600 ${Math.round(12*dpr)}px "Pixelify Sans", sans-serif`;
+    for(const s of G.settlements){if(!vis(s.x,s.y))continue;const X=ox+s.x*sc,Y=oy+(s.y*TS+16)*ps;
+      ctx.lineWidth=3*dpr;ctx.strokeStyle='rgba(20,14,10,.85)';ctx.strokeText(s.name,X,Y);ctx.fillStyle=s.owner===0?PCOLOR:'#efe6d0';ctx.fillText(s.name,X,Y)}
+    ctx.font=`600 ${Math.round(11*dpr)}px "Pixelify Sans", sans-serif`;
+    for(const p of G.parties){if(p.kind==='garrison'||p.inBattle||p.inside||!vis(p.x,p.y))continue;const X=ox+(p.x*TS+9)*ps,Y=oy+(p.y*TS-13)*ps;
+      const t=String(p.soldiers.length);ctx.lineWidth=3*dpr;ctx.strokeStyle='rgba(20,14,10,.9)';ctx.strokeText(t,X,Y);ctx.fillStyle=p.kind==='player'?PCOLOR:p.kind==='bandit'?'#e0a68e':'#efe6d0';ctx.fillText(t,X,Y)}
+    const X=ox+pp.x*sc,Y=oy+(pp.y*TS-30)*ps;if(!pp.inBattle&&!pp.inside){ctx.font=`600 ${Math.round(11*dpr)}px "Pixelify Sans", sans-serif`;ctx.strokeText(G.player.name||'Tú',X,Y);ctx.fillStyle=PCOLOR;ctx.fillText(G.player.name||'Tú',X,Y)}}
+  if(pop&&pop.type==='party'){const q=party(pop.id);if(q&&!q.inBattle){ctx.strokeStyle=PCOLOR;ctx.lineWidth=2*dpr;ctx.beginPath();ctx.ellipse(ox+q.x*sc,oy+(q.y*TS+1)*ps,1.4*sc,.6*sc,0,0,Math.PI*2);ctx.stroke()}}
+}
+let miniDirty=true,miniT=0;const mini=document.getElementById('mini'),mctx=mini.getContext('2d');
+function renderMini(){if(!miniBase)return;mctx.imageSmoothingEnabled=false;mctx.globalAlpha=1;mctx.drawImage(miniBase,0,0);mctx.globalAlpha=.55;
+  for(let i=0;i<W*H;i++){const o=own[i];if(o<0)continue;mctx.fillStyle=facColor(o);mctx.fillRect(i%W,(i/W)|0,1,1)}mctx.globalAlpha=1;
+  for(const s of G.settlements){mctx.fillStyle='#1a120c';mctx.fillRect(s.x-1.5,s.y-1.5,3,3);mctx.fillStyle=facColor(s.owner);mctx.fillRect(s.x-1,s.y-1,2,2)}
+  for(const B of battles){mctx.fillStyle='#ff5a3a';mctx.fillRect(B.cx-1,B.cy-1,2,2)}
+  for(const q of G.player.quests||[]){const b=party(q.target);if(b){mctx.fillStyle='#e0503a';mctx.fillRect(b.x-1,b.y-1,3,3)}}
+  const p=PP();mctx.fillStyle='#fff';mctx.fillRect(p.x-1,p.y-1,3,3);mctx.fillStyle=PCOLOR;mctx.fillRect(p.x-.5,p.y-.5,2,2);
+  const vw=cssW/(TS*cam.zoom),vh=cssH/(TS*cam.zoom);mctx.strokeStyle='rgba(255,255,255,.7)';mctx.lineWidth=1;mctx.strokeRect(cam.x-vw/2,cam.y-vh/2,vw,vh)}
+
+// ================= Interfaz =================
+const $=id=>document.getElementById(id);
+function setHTML(el,h){if(el._h!==h){el.innerHTML=h;el._h=h}}
+let speedIdx=0,paused=false,modalOpen=false,pop=null;
+function popClose(){pop=null;$('pop').style.display='none'}
+function relWord(r){return r>40?'Amistosa':r>10?'Cordial':r>-10?'Neutral':r>-40?'Tensa':'Hostil'}
+function canSwear(k){return G.player.liege==null&&!atWarDirect(0,k.id)&&G.player.renown>=8&&k.alive}
+function hud(){const p=PP(),pl=G.player,L=lordOf(),men=menOf(),days=Math.floor(rations()/Math.max(1,eatNeed())),lim=partyLimit(),load=invLoad(),cap=capacity();
+  const lands=G.settlements.filter(s=>s.owner===0).length,inside=p.inside?settl(p.inside):null;
+  setHTML($('hud'),`<div class="who"><div class="crest"></div><div class="nm">${esc(pl.name)}<span class="rank"> · ${TIERS[tierOf()].n}, ${pl.age} años</span></div></div>
+  <div class="stats"><span>Oro <b>${pl.gold}</b></span><span>Comida <b class="${days<3?'bad':''}">${days} días</b></span><span>Hombres <b>${men}/${lim}</b>${p.soldiers.some(s=>s.wounded)?` <span class="bad">(${p.soldiers.filter(s=>s.wounded).length} heridos)</span>`:''}</span><span title="${esc(moraleParts().map(x=>x[0]+': '+(x[1]>0?'+':'')+x[1]).join('\n'))}">Moral <b class="${pl.morale<30?'bad':''}">${Math.round(pl.morale)}</b></span>${p.soldiers.some(canUp)?'<span><b>⬆ mejoras listas</b></span>':''}<span>Carga <b class="${load>cap?'bad':''}">${load}/${cap}</b></span>${pl.pris&&pl.pris.n?`<span>Prisioneros <b>${pl.pris.n}</b></span>`:''}<span>Renombre <b>${pl.renown}</b></span>${lands?`<span>Tierras <b>${lands}</b></span>`:''}<span>Salud <span class="hp"><i style="width:${Math.round(100*L.hp/L.maxhp)}%"></i></span></span>${pl.liege!=null?`<span>Vasallo de <b>${esc(G.kingdoms[pl.liege].name)}</b></span>`:''}${inside?`<span>En <b>${esc(inside.name)}</b></span>`:''}</div>
+  <div class="time"><span>${fmtDate(G.day)}</span><button data-a="pause" class="${paused?'on':''}" aria-label="Pausa">❚❚</button>${SPEEDS.map((s,i)=>`<button data-a="speed" data-v="${i}" class="${!paused&&speedIdx===i?'on':''}">${s}×</button>`).join('')}</div>
+  <div class="menu"><button data-a="company">Compañía</button><button data-a="quests">Tareas${(pl.quests||[]).length?' ('+pl.quests.length+')':''}</button><button data-a="kingdoms">Reinos</button><button data-a="chron">Crónica</button><button data-a="save">Guardar</button></div>`)}
+function ctxPanel(){const p=PP(),el=$('ctx'),bb=$('bbar');
+  const B=battles.find(b=>sideOfPlayer(b)>=0);
+  if(B){el.style.display='none';bb.style.display='block';const ps=sideOfPlayer(B),al=[0,0];for(const u of B.units)if(u.s.hp>0)al[u.side]++;
+    setHTML(bb,`<h4>${B.siege?'Asalto a '+esc(settl(B.siege).name):'En batalla'}</h4><div class="sub">Tus hombres en pie: ${al[ps]} · Enemigos: ${al[1-ps]}</div><div class="sub">Moral tuya <span class="mbar"><i style="width:${clamp(Math.round(B.mor[ps]),0,100)}%;background:var(--ok)"></i></span> · enemiga <span class="mbar"><i style="width:${clamp(Math.round(B.mor[1-ps]),0,100)}%"></i></span></div>
+    <div class="row"><button data-a="cmd" data-v="charge" class="${B.cmd==='charge'?'on':''}">Cargar</button><button data-a="cmd" data-v="hold" class="${B.cmd==='hold'?'on':''}">Mantener la línea</button><button data-a="cmd" data-v="retreat" class="warn ${B.cmd==='retreat'?'on':''}">Retirada</button></div>`);return}
+  bb.style.display='none';const s=pNear;if(!s||p.inside){el.style.display='none';return}
+  el.style.display='block';const g=party(s.gar),hostile=facWar(0,s.owner);
+  let h=`<h4>${esc(s.name)}</h4><div class="sub">${s.type==='castle'?'Castillo':'Aldea'} de ${esc(facName(s.owner))} · guarnición ${g.soldiers.length}</div><div class="row">`;
+  h+=hostile?siegeButtons(s,true):`<button data-a="enter" data-v="${s.id}" class="on">Entrar en ${esc(s.name)}</button>`;
+  setHTML(el,h+'</div>')}
+function siegeButtons(s,hostile){const men=menOf(),wood=G.player.inv.madera||0,decl=hostile?'':' (declara la guerra)';let h='';
+  if(s.type==='village'){h+=`<button data-a="siege" data-v="${s.id}|raid" class="warn" ${men<RAID_MIN?'disabled':''} title="Necesitas ${RAID_MIN} hombres">Saquear${decl}${men<RAID_MIN?' · '+RAID_MIN+' hombres':''}</button>`;
+    h+=`<button data-a="siege" data-v="${s.id}|assault" class="warn" ${men<TAKE_VILLAGE_MIN?'disabled':''}>Tomar la aldea${decl}${men<TAKE_VILLAGE_MIN?' · '+TAKE_VILLAGE_MIN+' hombres':''}</button>`}
+  else{const ok=men>=CASTLE_MIN&&wood>=CASTLE_WOOD;h+=`<button data-a="siege" data-v="${s.id}|assault" class="warn" ${ok?'':'disabled'}>Asaltar el castillo${decl}${ok?'':' · '+CASTLE_MIN+' hombres y '+CASTLE_WOOD+' de madera'}</button>`}
+  return h}
+function popPanel(){if(!pop)return;const el=$('pop');el.style.display='block';let h='';
+  if(pop.type==='party'){const q=party(pop.id);if(!q||q.inBattle){popClose();return}const me=PP(),ratio=strength(q)/Math.max(1,strength(me)),hostile=facWar(0,q.fac);
+    const rs=ratio>1.4?'Mucho más fuertes que tú':ratio>1.1?'Algo más fuertes que tú':ratio>.85?'Parejos contigo':ratio>.6?'Algo más débiles':'Mucho más débiles';
+    h=`<h4>${esc(partyName(q))}</h4><p>${q.soldiers.length} hombres · ${rs}</p><p style="color:var(--dim)">${q.fac>0?`${esc(rulerTitle(G.kingdoms[q.fac]))} · relación ${relWord(getRel(0,q.fac))}`:'Fuera de toda ley'}${hostile?' · <span class="war">enemigos</span>':''}</p><div class="row">`;
+    if(q.fac!==G.player.liege||hostile)h+=`<button data-a="attack" data-v="${q.id}" class="${hostile?'':'warn'}">${hostile?'Atacar':'Atacar (declara la guerra)'}</button>`;
+    h+=`<button data-a="popclose">Cerrar</button></div>`}
+  else{const s=settl(pop.id);if(!s){popClose();return}const g=party(s.gar),hostile=facWar(0,s.owner);
+    h=`<h4>${esc(s.name)}</h4><p>${s.type==='castle'?'Castillo':'Aldea'} de ${esc(facName(s.owner))} · guarnición ${g.soldiers.length}</p>${s.owner>0?`<p style="color:var(--dim)">${esc(rulerTitle(G.kingdoms[s.owner]))} · relación ${relWord(getRel(0,s.owner))}${hostile?' · <span class="war">en guerra contigo</span>':''}</p>`:''}<p style="color:var(--dim)">${s.type==='village'?'Produce '+GOODS[s.prod].n.toLowerCase()+(s.raided>0?' · saqueada':''):'Mercado, herrería, taberna y tratante'}</p><div class="row">${hostile?`<button data-a="goto" data-v="${s.id}">Ir allí</button>`:`<button data-a="enter" data-v="${s.id}" class="on">Entrar</button>`}`;
+    if(s.owner!==0&&s.owner!==G.player.liege||hostile)h+=siegeButtons(s,hostile);
+    h+=`<button data-a="popclose">Cerrar</button></div>`}
+  setHTML(el,h)}
+function chron(){if(!chronDirty)return;chronDirty=false;setHTML($('chron').querySelector('.list'),G.log.slice(0,80).map(e=>`<div class="e"><small>${fmtDate(e.d)}</small>${esc(e.t)}</div>`).join(''))}
+function openModal(h){$('modal').querySelector('.box').innerHTML=h;$('modal').classList.add('open');modalOpen=true}
+function closeModal(){$('modal').classList.remove('open');$('modal').querySelector('.box').classList.remove('start');modalOpen=false}
+function trs(arr,map){return arr.map(t=>`<span class="tr" title="${esc(map[t]?.d||map[t]||'')}">${esc(t)}</span>`).join('')}
+function companyModal(){const p=PP(),pl=G.player,L=lordOf(),t=tierOf();
+  const idx=s=>p.soldiers.indexOf(s);
+  const upBtn=s=>{if(!canUp(s))return s.lvl>=5?'<small style="color:var(--dim)">máximo</small>':`<small style="color:var(--dim)">${s.xp}/${UPXP[s.lvl+1]} exp</small>`;const c=UPCOST[s.lvl+1],dis=pl.gold<c?'disabled':'';
+    return s.lvl===2?`<button data-a="up" data-v="${idx(s)}|g" ${dis}>Guardia (${c})</button><button data-a="up" data-v="${idx(s)}|h" ${dis}>Hachero (${c})</button>`:`<button data-a="up" data-v="${idx(s)}" ${dis}>Mejorar (${c})</button>`};
+  const rows=p.soldiers.filter(s=>!s.lord).sort((a,b)=>b.lvl-a.lvl).map(s=>`<tr><td>${esc(s.name)}${s.wounded?' <span class="st-w">herido</span>':''}</td><td>${rankName(s)}</td><td>${s.hp}/${s.maxhp}</td><td>${s.atk}/${s.def}</td><td>${EQ[s.eq||0].n}</td><td>${trs(s.traits,STRAITS)}</td><td class="tb">${upBtn(s)}</td></tr>`).join('');
+  const ready=p.soldiers.filter(s=>canUp(s)&&s.lvl!==2),readyCost=ready.reduce((a,s)=>a+UPCOST[s.lvl+1],0);
+  const inv=GK.filter(k=>pl.inv[k]).map(k=>`${GOODS[k].n} ${pl.inv[k]}`).join(' · ')||'nada';
+  openModal(`<h2>Tu compañía</h2><p>${esc(pl.name)}, ${pl.age} años, ${TIERS[t].n}. ${trs(pl.traits,LTRAITS)}</p>
+  <p style="font-size:14px;color:var(--dim)">Señor: nivel ${L.lvl}, vida ${L.hp}/${L.maxhp}, ataque ${L.atk}, defensa ${L.def}. Mandas hasta ${partyLimit()} hombres.${t<TIERS.length-1?` Con ${TIERS[t+1].r} de renombre serás ${TIERS[t+1].n} y podrás llevar ${TIERS[t+1].m+L.lvl}.`:''} Cada hombre cobra 1 de oro y come 1 ración al día.</p>
+  <p style="font-size:14px">Carga (${invLoad()}/${capacity()}): ${inv}.${pl.pris&&pl.pris.n?` Prisioneros: ${pl.pris.n}, valen ${pl.pris.v} de oro en un castillo.`:''}</p>
+  <p style="font-size:14px">Moral: <b>${Math.round(pl.morale)}</b> (${moraleWord(pl.morale)}) · ${moraleParts().map(x=>x[0].toLowerCase()+' '+(x[1]>0?'+':'')+x[1]).join(', ')}.<br>Medicina de tu señor: <b>${Math.floor(pl.med||0)}</b>. Sube al cuidar heridos; salva más vidas en combate y acelera la curación.</p>
+  <p style="font-size:13px;color:var(--dim)">Tus hombres ganan experiencia en batalla. Al llegar a la necesaria puedes pagar para ascenderlos: Recluta → Soldado → Guardia (más vida y defensa) o Hachero (más ataque) → veterano → élite. Cada ascenso mejora su equipo.</p>
+  ${ready.length?`<div class="row" style="margin-bottom:8px"><button data-a="upall" ${pl.gold<readyCost?'disabled':''}>Ascender a los ${ready.length} listos (${readyCost} oro)</button></div>`:''}
+  ${rows?`<div style="overflow-x:auto"><table><tr><th>Nombre</th><th>Rango</th><th>Vida</th><th>Atq/Def</th><th>Equipo</th><th>Rasgos</th><th>Ascenso</th></tr>${rows}</table></div>`:'<p>No te sigue nadie. Recluta voluntarios entrando en cualquier aldea que no te sea hostil.</p>'}
+  <div class="row" style="margin-top:12px"><button data-a="close">Volver al mapa</button>${G.settlements.some(s=>s.owner===0&&s.type==='castle')?'':'<button data-a="grantcastle" class="warn">🧪 Prueba: recibir un castillo</button>'}</div>`)}
+function kingdomsModal(){const pl=G.player;let h=`<h2>Reinos</h2><p>Tu renombre: ${pl.renown}. ${pl.liege!=null?'Eres vasallo de '+esc(G.kingdoms[pl.liege].name)+': sus guerras son tuyas y te paga cada día.':'No has jurado lealtad a nadie.'}</p>`;
+  for(const k of G.kingdoms){if(k.isPlayer||!k.alive)continue;const mine=G.settlements.filter(s=>s.owner===k.id),men=G.parties.filter(p=>p.fac===k.id).reduce((a,p)=>a+p.soldiers.length,0);
+    const wars=G.kingdoms.filter(e=>e.alive&&e.id!==k.id&&atWarDirect(k.id,e.id)).map(e=>e.isPlayer?'contigo':esc(e.name));const r=getRel(0,k.id),war=atWarDirect(0,k.id);
+    h+=`<div class="kg"><div class="t"><b><span class="sw" style="background:${k.color}"></span>${esc(k.name)}</b><span style="font-size:13px">Relación contigo: ${relWord(r)} (${Math.round(r)})</span></div>
+    <div class="d">${esc(rulerTitle(k))}, ${k.ruler.age} años, de la casa de ${esc(k.house)} · ${trs(k.ruler.traits,{})} · ${mine.length} tierras · ${men} soldados${wars.length?` · <span class="war">en guerra con ${wars.join(', ')}</span>`:' · en paz'}</div><div class="row">`;
+    if(pl.liege===k.id)h+=`<button data-a="break" class="warn">Romper el juramento</button>`;
+    else if(war)h+=`<button data-a="peace" data-v="${k.id}" ${pl.peaceCD>0?'disabled':''}>Proponer la paz${pl.peaceCD>0?' (espera '+pl.peaceCD+' días)':''}</button>`;
+    else{h+=`<button data-a="war" data-v="${k.id}" class="warn">Declarar la guerra</button>`;if(pl.liege==null)h+=`<button data-a="swear" data-v="${k.id}" ${canSwear(k)?'':'disabled'}>Jurar lealtad${pl.renown<8?' (necesitas 8 de renombre)':''}</button>`}
+    h+='</div></div>'}
+  openModal(h+`<div class="row" style="margin-top:8px"><button data-a="close">Volver al mapa</button></div>`)}
+function startModal(){const box=$('modal').querySelector('.box');box.classList.add('start');const s=hasSave();
+  openModal(`<p class="ttl">Estandarte</p><p class="tag">Un mundo medieval que vive aunque tú no hagas nada.</p>
+  <p>Eres un caballero sin tierras con tres hombres mal armados, algo de grano y unas monedas. Los reinos crecen, se casan, se traicionan y se hacen la guerra por su cuenta. Lo que hagas con tu espada es cosa tuya.</p>
+  <label for="nm">Nombre de tu caballero</label><input id="nm" maxlength="28" value="Sir ${esc(pick(MALE))}">
+  <ul><li>Toca el mapa para moverte (o WASD). Arrastra para mover la cámara.</li><li>Entra en aldeas y castillos para comerciar, reclutar, equiparte, aceptar tareas y vender prisioneros.</li><li>Cuanto más renombre, más hombres puedes mandar. Saquear y asaltar castillos exige un ejército grande.</li><li>Espacio pausa. En batalla puedes cargar, mantener la línea o retirarte.</li></ul>
+  <div class="row"><button data-a="start" class="on">Comenzar</button>${s?'<button data-a="continue">Continuar partida guardada</button>':''}<button data-a="newworld">Otro mundo</button></div>`);
+  $('modal').querySelector('.box').classList.add('start')}
+function uiTick(){if(!started)return;hud();ctxPanel();popPanel();chron()}
+
+function act(a,v){const pl=G&&G.player,p=G&&PP();
+  switch(a){
+  case'start':{pl.name=($('nm').value||'Sir Aldric').trim().slice(0,28);const lt=Object.keys(LTRAITS).sort(()=>R()-.5);pl.traits=[lt[0],lt[1]];
+    if(pl.traits.includes('Guerrero')){const L=lordOf();L.maxhp+=20;L.hp=L.maxhp;L.atk+=3}
+    G.kingdoms[0].name=facName(0);pl.started=true;closeModal();beginPlay();log(`${pl.name} parte en busca de fortuna con tres hombres.`);break}
+  case'continue':if(loadGame()){closeModal();beginPlay();toast('Partida cargada.')}else toast('No se pudo cargar la partida.');break;
+  case'newworld':genWorld((Math.random()*2**31)>>>0);buildTerrainCanvas();rebuildTerritory();cam.x=PP().x;cam.y=PP().y;break;
+  case'pause':paused=!paused;break;
+  case'speed':speedIdx=+v;paused=false;break;
+  case'company':companyModal();break;case'kingdoms':kingdomsModal();break;
+  case'chron':$('chron').classList.toggle('hide');break;case'save':saveGame(false);break;case'close':if(p&&p.inside){townView='main';townModal()}else closeModal();break;case'popclose':popClose();break;
+  case'zoomin':cam.zoom=Math.min(6,cam.zoom+1);break;case'zoomout':cam.zoom=Math.max(1,cam.zoom-1);break;case'center':cam.follow=true;break;
+  case'cmd':{const B=battles.find(b=>sideOfPlayer(b)>=0);if(B){B.cmd=v;if(v==='retreat')B.rt=0}break}
+  case'recruit':{const s=settl(p.inside)||pNear,cost=pl.traits.includes('Carismático')?18:25;let n=+v||1,got=0;while(n-->0&&s&&s.recruits>0&&pl.gold>=cost&&menOf()<partyLimit()){pl.gold-=cost;s.recruits--;p.soldiers.push(makeSoldier(1));got++}if(got)toast(`${got} ${got>1?'voluntarios se unen':'voluntario se une'} a tu compañía.`);if(p.inside)townModal();break}
+  case'enter':{const s=settl(+v);if(!s||facWar(0,s.owner))break;popClose();if(dist(p.x,p.y,s.x,s.y)<2.2)enterSettlement(s);else{p.target={type:'enter',id:s.id};setPathTo(p,s.x,s.y+1);cam.follow=true}break}
+  case'leave':leaveSettlement();break;
+  case'tv':townView=v;townModal();break;
+  case'buy':{const s=settl(p.inside),[k,n0]=v.split('|');let n=+n0;while(n-->0&&(s.stock[k]||0)>0&&pl.gold>=buyP(s,k)&&invLoad()<capacity()){pl.gold-=buyP(s,k);s.stock[k]--;pl.inv[k]=(pl.inv[k]||0)+1}townModal();break}
+  case'sell':{const s=settl(p.inside),[k,n0]=v.split('|');let n=+n0;while(n-->0&&(pl.inv[k]||0)>0){pl.gold+=sellP(s,k);s.stock[k]=(s.stock[k]||0)+1;pl.inv[k]--}townModal();break}
+  case'equip':{const[t0,useI]=v.split('|'),t=+t0,need=p.soldiers.filter(x=>(x.eq||0)<t);let cost=need.reduce((a,x)=>a+EQ[t].c-EQ[x.eq||0].c,0);
+    if(+useI){cost=Math.round(cost*.75);if((pl.inv.hierro||0)<need.length)break;pl.inv.hierro-=need.length}if(pl.gold<cost)break;pl.gold-=cost;for(const x of need)setEq(x,t);log(`Equipaste a ${need.length} hombres con ${EQ[t].n.toLowerCase()}.`);townModal();break}
+  case'hire':{const s=settl(p.inside),m=s&&s.mercs&&s.mercs[+v];if(m&&pl.gold>=m.cost&&menOf()<partyLimit()){pl.gold-=m.cost;s.mercs.splice(+v,1);delete m.cost;p.soldiers.push(m);toast(`${m.name} se une por dinero.`)}townModal();break}
+  case'sellpris':{if(pl.pris&&pl.pris.n){log(`Vendiste ${pl.pris.n} prisioneros por ${pl.pris.v} de oro.`,true);pl.gold+=pl.pris.v;pl.pris={n:0,v:0}}townModal();break}
+  case'accept':{const s=settl(p.inside),o=s.offers[+v];if(o&&(pl.quests||[]).length<3){pl.quests.push({...o,giver:s.id,dl:G.day+30});toast('Tarea aceptada.')}townModal();break}
+  case'deliver':{const q=pl.quests[+v];if(q&&(pl.inv[q.good]||0)>=q.qty){pl.inv[q.good]-=q.qty;const s=settl(q.giver);s.stock[q.good]=(s.stock[q.good]||0)+q.qty;completeQuest(q)}townModal();break}
+  case'work':{const s=settl(p.inside),gold=2*p.soldiers.length*2;for(let i=0;i<2;i++)step(DAY);pl.gold+=gold;log(`Tus hombres trabajaron dos días en ${s.name}: +${gold} oro.`,true);townModal();break}
+  case'rest':{for(let i=0;i<3;i++)step(DAY);toast('Descansaste tres días.');if(p.inside)townModal();break}
+  case'enc':encAct(v);break;
+  case'grantcastle':grantCastle();break;
+  case'up':{const[i,line]=v.split('|'),s=p.soldiers[+i];if(s&&canUp(s)&&pl.gold>=UPCOST[s.lvl+1]){pl.gold-=UPCOST[s.lvl+1];doUp(s,line);toast(`${s.name} asciende a ${rankName(s)}.`)}companyModal();break}
+  case'upall':{let n=0;for(const s of p.soldiers){if(canUp(s)&&s.lvl!==2&&pl.gold>=UPCOST[s.lvl+1]){pl.gold-=UPCOST[s.lvl+1];doUp(s);n++}}if(n)toast(`${n} hombres ascendieron.`);companyModal();break}
+  case'quests':questsModal();break;
+  case'occupy':closeModal();G.sack=null;break;
+  case'sack':{const s=settl(G.sack);G.sack=null;closeModal();if(!s)break;const gold=ri(160,320);pl.gold+=gold;let got=0;for(const k of GK){const n=Math.min(s.stock[k]||0,Math.max(0,capacity()-invLoad()));pl.inv[k]=(pl.inv[k]||0)+n;s.stock[k]-=n;got+=n}
+    const prev=s.prevOwner!=null&&s.prevOwner>0&&G.kingdoms[s.prevOwner].alive?s.prevOwner:null;if(prev){s.owner=prev;party(s.gar).fac=prev;addRel(0,prev,-25);rebuildTerritory()}
+    log(`Saqueaste ${s.name}: +${gold} oro y ${got} cargas de botín.${prev?' Lo dejas vacío para '+G.kingdoms[prev].name+'.':''}`,true);break}
+  case'gleave':{const s=settl(p.inside)||pNear;if(s&&s.owner===0&&p.soldiers.length>1){const i=p.soldiers.findIndex(x=>!x.lord);party(s.gar).soldiers.push(p.soldiers.splice(i,1)[0])}if(p.inside)townModal();break}
+  case'gtake':{const s=settl(p.inside)||pNear;if(s&&s.owner===0&&menOf()<partyLimit()){const g=party(s.gar);if(g.soldiers.length)p.soldiers.push(g.soldiers.pop())}if(p.inside)townModal();break}
+  case'swear':{const k=G.kingdoms[+v];if(canSwear(k)){pl.liege=k.id;addRel(0,k.id,20);log(`Juraste lealtad a ${rulerTitle(k)} de ${k.name}. Sus enemigos ahora son los tuyos.`,true);if(p.inside)townModal();else if(modalOpen)kingdomsModal()}break}
+  case'break':{const k=G.kingdoms[pl.liege];pl.liege=null;addRel(0,k.id,-40);log(`Rompiste tu juramento con ${k.name}. No lo olvidarán.`,true);if(modalOpen)kingdomsModal();break}
+  case'war':{declareWar(0,+v);if(modalOpen)kingdomsModal();break}
+  case'peace':{const k=G.kingdoms[+v],r=getRel(0,k.id),ch=clamp(.3+pl.renown*.006+(r+100)/500,.1,.85);
+    if(R()<ch)makePeace(0,k.id);else{pl.peaceCD=10;addRel(0,k.id,-5);log(`${rulerTitle(k)} rechazó tu propuesta de paz.`,true)}if(modalOpen)kingdomsModal();break}
+  case'attack':{const q=party(+v);if(!q)break;if(q.fac>0&&!facWar(0,q.fac)){if(pl.liege===q.fac)act('break');declareWar(0,q.fac,'atacaste a sus hombres')}
+    p.target={type:'party',id:q.id};p.think=0;popClose();break}
+  case'siege':{const[sid,mode]=v.split('|'),s=settl(+sid);if(!s)break;const men=menOf();
+    if(mode==='raid'&&men<RAID_MIN){toast(`Para saquear necesitas al menos ${RAID_MIN} hombres.`);break}
+    if(mode!=='raid'&&s.type==='village'&&men<TAKE_VILLAGE_MIN){toast(`Para tomar una aldea necesitas al menos ${TAKE_VILLAGE_MIN} hombres.`);break}
+    if(s.type==='castle'&&(men<CASTLE_MIN||(pl.inv.madera||0)<CASTLE_WOOD)){toast(`Para asaltar un castillo necesitas ${CASTLE_MIN} hombres y ${CASTLE_WOOD} de madera para las escalas.`);break}
+    if(s.owner>0&&!facWar(0,s.owner)){if(pl.liege===s.owner)act('break');declareWar(0,s.owner,(mode==='raid'?'saqueaste ':'atacaste ')+s.name)}
+    p.target={type:'settlement',id:s.id,mode};setPathTo(p,s.x,s.y);popClose();cam.follow=true;break}
+  case'goto':{const s=settl(+v);if(s){p.target={type:'point',x:s.x,y:s.y+1};setPathTo(p,s.x,s.y+1)}popClose();break}
+  }uiTick()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;act(b.dataset.a,b.dataset.v)});
+
+// ================= Entrada =================
+let pd=null;
+cv.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,cx:cam.x,cy:cam.y,drag:false};cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!pd)return;const dx=e.clientX-pd.x,dy=e.clientY-pd.y;if(!pd.drag&&Math.hypot(dx,dy)>7){pd.drag=true;cam.follow=false}
+  if(pd.drag){cam.x=clamp(pd.cx-dx/(TS*cam.zoom),0,W);cam.y=clamp(pd.cy-dy/(TS*cam.zoom),0,H)}});
+cv.addEventListener('pointerup',e=>{if(pd&&!pd.drag&&started&&!modalOpen)clickMap(e.clientX,e.clientY);pd=null});
+cv.addEventListener('wheel',e=>{e.preventDefault();cam.zoom=clamp(cam.zoom+(e.deltaY<0?1:-1),1,6)},{passive:false});
+mini.addEventListener('click',e=>{const r=mini.getBoundingClientRect();cam.x=(e.clientX-r.left)/r.width*W;cam.y=(e.clientY-r.top)/r.height*H;cam.follow=false});
+function clickMap(sx,sy){const r=cv.getBoundingClientRect(),tx=cam.x+(sx-r.left-cssW/2)/(TS*cam.zoom),ty=cam.y+(sy-r.top-cssH/2)/(TS*cam.zoom);
+  const p=PP();if(p.inBattle||p.inside||G.enc)return;
+  let best=null,bd=1.1;for(const q of G.parties){if(q.kind==='garrison'||q.kind==='player'||q.inBattle)continue;const d=dist(q.x,q.y-.8,tx,ty);if(d<bd){bd=d;best=q}}
+  if(best){pop={type:'party',id:best.id};return}
+  let bs=null,bsd=9;for(const s of G.settlements){const d=dist(s.x,s.y-(s.type==='castle'?2:1),tx,ty);if(d<(s.type==='castle'?2.6:2.1)&&d<bsd){bsd=d;bs=s}}
+  if(bs){pop={type:'settlement',id:bs.id};return}
+  popClose();if(!inMain(tx,ty))return;p.target={type:'point',x:tx,y:ty};setPathTo(p,tx,ty);cam.follow=true}
+const KM={KeyW:'u',ArrowUp:'u',KeyS:'d',ArrowDown:'d',KeyA:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r'};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'){if(e.key==='Enter'&&!started)act('start');return}
+  if(modalOpen)return;
+  if(KM[e.code]){keys[KM[e.code]]=true;cam.follow=true;e.preventDefault()}
+  else if(e.code==='Space'){paused=!paused;e.preventDefault()}else if(e.key==='1'||e.key==='2'||e.key==='3'){speedIdx=+e.key-1;paused=false}
+  else if(e.key==='+'||e.key==='=')act('zoomin');else if(e.key==='-')act('zoomout');else if(e.key==='Escape'){if(G&&(G.enc||G.sack||PP().inside))return;if(modalOpen&&started)closeModal();else popClose()}});
+addEventListener('keyup',e=>{if(KM[e.code])keys[KM[e.code]]=false});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
+addEventListener('resize',resize);
+
+// ================= Arranque =================
+function beginPlay(){started=true;for(const id of['hud','minibox'])$(id).style.display='';$('chron').style.display='';if(innerWidth<820)$('chron').classList.add('hide');
+  const p=PP();cam.x=p.x;cam.y=p.y;cam.follow=true;chronDirty=true;miniDirty=true}
+let last=performance.now(),uiT=0;
+function frame(t){const dtr=Math.min(.05,(t-last)/1000);last=t;now=t/1000;
+  if(G&&started){const sp=paused||modalOpen?0:SPEEDS[speedIdx];if(sp>0)step(dtr*sp);
+    const p=PP();if(cam.follow){const B=battles.find(b=>sideOfPlayer(b)>=0),tx=B?B.cx:p.x,ty=B?B.cy:p.y;cam.x+=(tx-cam.x)*Math.min(1,dtr*6);cam.y+=(ty-cam.y)*Math.min(1,dtr*6)}
+    uiT-=dtr;if(uiT<=0){uiT=.25;uiTick()}miniT-=dtr;if(miniT<=0){miniT=.4;renderMini()}}
+  else if(G){const p=PP();cam.x+=Math.sin(t/4000)*.01}
+  render();requestAnimationFrame(frame)}
+resize();genWorld((Math.random()*2**31)>>>0);buildTerrainCanvas();rebuildTerritory();{const p=PP();cam.x=p.x;cam.y=p.y;cam.zoom=2}
+startModal();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
