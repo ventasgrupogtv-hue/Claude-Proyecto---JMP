@@ -13,7 +13,7 @@ Abre `index.html` en cualquier navegador moderno (o la página de GitHub Pages d
 - Espacio pausa. En batalla puedes cargar, mantener la línea o retirarte.
 - La partida se guarda en el navegador (botón *Guardar*).
 
-## Sistemas actuales (versión 0.4)
+## Sistemas actuales (versión 0.5)
 
 - Mundo generado al azar: 5 reinos con gobernantes, casas, personalidades, diplomacia, guerras y sucesión.
 - Batallas en tiempo real sobre el mapa, o resolución instantánea con probabilidad estimada.
@@ -24,16 +24,16 @@ Abre `index.html` en cualquier navegador moderno (o la página de GitHub Pages d
 - Economía: aldeas productoras, 8 mercancías, precios por oferta y demanda, caminos.
 - Rangos por renombre que limitan el tamaño del ejército.
 - Tareas, prisioneros, saqueos, asedios, vasallaje y feudos propios.
+- Gestión de feudos: prosperidad, lealtad, seguridad, impuestos, milicia, granero del castillo y obras (murallas, granero, cuartel, mercado, molino, empalizada, torres, capilla). Un feudo descontento puede rebelarse.
 
 ## Próximos pasos
 
-1. Gestión de feudos: prosperidad, lealtad, seguridad, comida, milicia y proyectos.
-2. Notables con relación en cada aldea (mejores reclutas y tareas).
-3. Habilidades que suben con el uso y puntos de enfoque.
-4. Influencia y ejércitos aliados como vasallo.
-5. Asedios por fases (cerco, hambre, máquinas, asalto).
-6. Talleres y caravanas.
-7. Familia, herederos y sucesión del jugador.
+1. Notables con relación en cada aldea (mejores reclutas y tareas).
+2. Habilidades que suben con el uso y puntos de enfoque.
+3. Influencia y ejércitos aliados como vasallo.
+4. Asedios por fases (cerco, hambre, máquinas, asalto).
+5. Talleres y caravanas.
+6. Familia, herederos y sucesión del jugador.
 
 ## Tecnología
 
